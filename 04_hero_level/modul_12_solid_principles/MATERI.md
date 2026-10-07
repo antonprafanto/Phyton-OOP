@@ -223,8 +223,23 @@ class LayananCheckout:
 Banyak pemula yang baru belajar SOLID langsung membuat 20 interface dan 30 file class hanya untuk membuat program kalkulator 2 angka!  
 *Ingat:* **SOLID adalah obat untuk mengobati kompleksitas, bukan tujuan akhir**. Terapkan SOLID ketika sistem Anda mulai berkembang atau sering mengalami perubahan kebutuhan bisnis.
 
-### ❌ Jebakan 2: SRP Ekstrem
+### ❌ Jebakan 2: SRP yang Terlalu Ekstrem
 Memecah kode hingga setiap fungsi 2 baris ditaruh di file class terpisah justru akan membuat kode sulit dibaca (*fragmentation nightmare*). Kelompokkan tanggung jawab berdasarkan alasan perubahan logika bisnis, bukan jumlah baris.
+
+### ❌ Jebakan 3: Mengira DIP Sama dengan Dependency Injection (DI)
+Banyak pemula menyamakan DIP dan DI:
+* **Dependency Inversion Principle (DIP)** adalah **prinsip arsitektur** (aturan filosofis tingkat tinggi: *"Bergantunglah pada abstraksi, bukan detail konkret"*).
+* **Dependency Injection (DI)** adalah **teknik / cara implementasi** untuk mewujudkan prinsip tersebut (yaitu menyuntikkan objek lewat parameter constructor `__init__(self, service)`). DI adalah kendaraan untuk mencapai DIP.
+
+### ❌ Jebakan 4: Mengabaikan Kontrak Interface di Bahasa Dinamis
+Karena Python bersifat dinamis (*duck typing*), pemula sering malas membuat class `ABC`. Akibatnya:
+* Tidak ada panduan jelas method apa saja yang wajib ada bagi developer lain.
+* Error baru meledak saat program sudah berjalan di server (*runtime crash*).
+* Gunakanlah `abc.ABC` atau `typing.Protocol` untuk mendefinisikan kontrak ISP secara tegas.
+
+### ❌ Jebakan 5: Kapan Boleh Tidak Menggunakan SOLID?
+Jika Anda sedang membuat skrip otomatisasi satu kali pakai (*one-off migration script*), eksperimen data science cepat di Jupyter Notebook, atau prototipe hackathon 1 hari: Anda **tidak perlu** menerapkan SOLID secara ketat!  
+Gunakan prinsip **YAGNI (You Aren't Gonna Need It)**. Terapkan SOLID ketika kode tersebut akan dipelihara oleh tim, memiliki aturan bisnis jangka panjang, atau sering mengalami perubahan kebutuhan (*evolving production software*).
 
 ---
 
@@ -246,6 +261,12 @@ Ketika sebuah class anak (subclass) menolak method warisan dari induknya dengan 
 <details>
 <summary>👁️ Lihat Jawaban</summary>
 Dengan menerapkan pola <strong>Dependency Injection</strong>: constructor menerima objek ketergantungan (misal: koneksi database atau pengirim notifikasi) lewat parameter fungsi yang bertipe interface/abstraksi, daripada membuat objek konkretnya di dalam constructor itu sendiri.
+</details>
+
+4. **Apa manfaat utama mematuhi Interface Segregation Principle (ISP) bagi pengembang perangkat lunak?**
+<details>
+<summary>👁️ Lihat Jawaban</summary>
+Mencegah terjadinya <i>fat/bloated interface</i> (antarmuka gemuk). Class turunan hanya perlu mengimplementasikan method-method yang benar-benar relevan dengan peran aslinya, sehingga kode menjadi lebih ramping, minim efek samping, dan tidak dipaksa menyediakan implementasi kosong/dummy.
 </details>
 
 ---
