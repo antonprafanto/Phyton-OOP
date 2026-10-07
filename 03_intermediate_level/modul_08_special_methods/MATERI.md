@@ -187,7 +187,9 @@ Contoh yang tepat:
 
 ---
 
-## ⚠️ 6. Awas Jebakan Pemula!
+## ⚠️ 6. Awas Jebakan Pemula! (Common Pitfalls)
+
+Berikut adalah kesalahan-kesalahan yang paling sering dialami pemula:
 
 ### ❌ Jebakan 1: Memaksa Semua Fungsi Pembantu Masuk ke Class
 Tidak semua fungsi harus masuk ke dalam class! Jika sebuah fungsi sangat umum (misal `format_rupiah` yang dipakai di 10 class berbeda), lebih baik dijadikan fungsi biasa di dalam file `utils.py` daripada dipaksakan menjadi `@staticmethod` di salah satu class.
@@ -196,7 +198,7 @@ Tidak semua fungsi harus masuk ke dalam class! Jika sebuah fungsi sangat umum (m
 ```python
 # SALAH:
 class Mobil:
-    def info_pabrik(cls):  # Python menganggap ini method biasa dengan parameter 'self' bernama 'cls'!
+    def info_pabrik(cls):  # Python mengira ini method biasa dengan parameter 'self' bernama 'cls'!
         print(cls)
 
 # BENAR:
@@ -206,9 +208,54 @@ class Mobil:
         print(cls)
 ```
 
+### ❌ Jebakan 3: Memanggil `self` di dalam `@classmethod` atau `@staticmethod`
+Karena parameter `self` tidak ada di dalam `@classmethod` (hanya ada `cls`) dan sama sekali tidak ada di `@staticmethod`, mencoba mengetik `self.nama` akan langsung memicu error:
+```python
+# SALAH:
+@classmethod
+def cetak_nama(cls):
+    print(self.nama)  # 💥 NameError: name 'self' is not defined!
+```
+
+### ❌ Jebakan 4: Hardcoding Nama Class Saat Membuat Alternative Constructor
+Jangan menulis nama kelas secara kaku jika ingin mendukung pewarisan (*subclassing*):
+```python
+# KURANG TEPAT (Merusak Inheritance):
+@classmethod
+def dari_string(cls, teks):
+    return User(...)  # Jika dipanggil Admin.dari_string(), yang lahir tetap User biasa!
+
+# BENAR & PYTHONIC:
+@classmethod
+def dari_string(cls, teks):
+    return cls(...)   # Jika dipanggil Admin.dari_string(), otomatis lahir objek Admin!
+```
+
+### ❌ Jebakan 5: Kebingungan Cara Memanggil Static / Class Method
+Apakah static method dipanggil lewat objek (`user1.format_rupiah()`) atau lewat Class (`User.format_rupiah()`)?
+* Secara teknis di Python, **keduanya bisa berjalan**.
+* Namun aturan *Clean Code* menganjurkan memanggilnya melalui nama **Class langsung** (`User.format_rupiah()`) agar programmer lain yang membaca kode langsung tahu bahwa method tersebut independen dari status objek individual.
+
 ---
 
-## 🧠 7. Kuis Uji Pemahaman
+## 🌳 7. Panduan Cepat: Pohon Keputusan Pemilihan Method
+
+Gunakan diagram alur ini saat Anda bingung memilih jenis method:
+
+```mermaid
+flowchart TD
+    Mulai([Fungsi Baru yang Ingin Dibuat]) --> Q1{Apakah butuh membaca/mengubah<br/>data spesifik SATU objek<br/>self.atribut?}
+    Q1 -->|YA| Im[Pakai Instance Method Biasa\ndef aksi self: ...]
+    Q1 -->|TIDAK| Q2{Apakah butuh membaca cetakan<br/>cls.atribut atau melahirkan objek<br/>Alternative Constructor?}
+    Q2 -->|YA| Cm[Gunakan @classmethod\n@classmethod\ndef buat cls: ...]
+    Q2 -->|TIDAK| Q3{Apakah fungsinya spesifik<br/>hanya untuk domain class ini?}
+    Q3 -->|YA| Sm[Gunakan @staticmethod\n@staticmethod\ndef util: ...]
+    Q3 -->|TIDAK - Fungsi Umum| Util[Jadikan Fungsi Bebas Biasa\ndi file utils.py]
+```
+
+---
+
+## 🧠 8. Kuis Uji Pemahaman
 
 Uji pemahaman Anda sebelum melangkah ke praktik kode:
 
@@ -228,6 +275,12 @@ Instance method menerima <code>self</code> (merujuk ke instansi/objek spesifik),
 <details>
 <summary>👁️ Lihat Jawaban</summary>
 Agar mendukung <strong>pewarisan (inheritance)</strong>. Jika suatu saat class tersebut diturunkan ke subkelas (misal <code>Admin</code> turunan dari <code>User</code>), pemanggilan <code>Admin.dari_string(...)</code> akan secara otomatis melahirkan objek bertipe <code>Admin</code>, bukan <code>User</code> biasa.
+</details>
+
+4. **Kapan sebuah fungsi pembantu lebih baik diletakkan di file terpisah (seperti `utils.py`) daripada dijadikan `@staticmethod` di dalam class?**
+<details>
+<summary>👁️ Lihat Jawaban</summary>
+Ketika fungsi pembantu tersebut bersifat <strong>sangat umum (general-purpose)</strong> dan dibutuhkan oleh banyak modul atau class berbeda di seluruh aplikasi (misal: format mata uang global, pembersih tag HTML umum, atau enkripsi token), sehingga tidak ada alasan logis untuk membatasi keberadaannya di dalam satu class tertentu saja.
 </details>
 
 ---
