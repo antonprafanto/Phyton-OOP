@@ -20,7 +20,7 @@ Gunakan daftar centang di bawah ini untuk memantau perjalanan belajar kita agar 
 | [x] | **Modul 6** | Pilar 4: Abstraction (Menyembunyikan Kerumitan dengan `abc`) | Core |
 | [x] | **Modul 7** | Python Superpowers: Magic / Dunder Methods (`__str__`, `__eq__`, dll.) | Intermediate |
 | [x] | **Modul 8** | Metode Spesial: `@classmethod` vs `@staticmethod` | Intermediate |
-| [ ] | **Modul 9** | Custom Exception: Membuat Pesan Error Sendiri dengan OOP | Intermediate |
+| [x] | **Modul 9** | Custom Exception: Membuat Pesan Error Sendiri dengan OOP | Intermediate |
 | [ ] | **Modul 10** | Modern Python Shortcut: `@dataclass` | Intermediate |
 | [ ] | **Modul 11** | Hubungan Antar Objek: Association, Aggregation, & Composition | Hero |
 | [ ] | **Modul 12** | Prinsip S.O.L.I.D untuk Pemula (Menulis Kode Rapi & Tahan Uji) | Hero |
