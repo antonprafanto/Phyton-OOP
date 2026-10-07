@@ -26,7 +26,7 @@ Untuk melihat silabus super lengkap dan memantau status belajar secara detail, s
 | :---: | :--- | :--- | :--- |
 | **Fase 1** | [**Modul 0**](01_zero_level/modul_00_mengapa_oop/MATERI.md) | Mengapa Butuh OOP? | Mental Model, Perbedaan Prosedural vs OOP, Atribut & Method |
 | *(Zero)* | [**Modul 1**](01_zero_level/modul_01_class_object/MATERI.md) | Melahirkan Objek Pertama | `class`, Object/Instance, Constructor `__init__`, dan Rahasia `self` |
-| | **Modul 2** | Variabel Milik Siapa? | Instance Attribute vs Class Attribute (Awas kebocoran data!) |
+| | [**Modul 2**](01_zero_level/modul_02_instance_vs_class_attr/MATERI.md) | Variabel Milik Siapa? | Instance Attribute vs Class Attribute (Awas kebocoran data!) |
 | **Fase 2** | **Modul 3** | Pilar 1: Encapsulation | Proteksi Data, Public/Private, dan Gaya Elegan `@property` |
 | *(Core)* | **Modul 4** | Pilar 2: Inheritance | Pewarisan Sifat, DRY, `super()`, & Multiple Inheritance |
 | | **Modul 5** | Pilar 3: Polymorphism | Overriding Method, Portabilitas Aksi, dan Filosofi *Duck Typing* |
