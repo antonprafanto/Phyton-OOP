@@ -1,6 +1,6 @@
 # 🛡️ MODUL 3: PILAR 1 – ENCAPSULATION & GAYA ELEGAN `@property`
 > **Tingkat**: Core Level (4 Pilar Utama OOP)  
-> **Tujuan**: Memahami esensi **Encapsulation** (pembungkusan data), mengenal 3 tingkatan akses di Python (*Public*, *Protected*, *Private*), membongkar rahasia *Name Mangling*, dan menguasai cara elegan Pythonic mengontrol data menggunakan decorator `@property`.
+> **Tujuan**: Memahami esensi **Encapsulation** (pembungkusan data), mengenal 3 tingkatan akses di Python (*Public*, *Protected*, *Private*), membongkar rahasia *Name Mangling*, menguasai trio lengkap `@property` (*Getter*, *Setter*, *Deleter*), serta memanfaatkan *Computed Property* untuk mencegah data basi.
 
 ---
 
@@ -76,30 +76,9 @@ Tujuan *Name Mangling* bukan untuk enkripsi militer anti-hacker, melainkan **men
 
 ---
 
-## 4. Cara Kuno vs Gaya Elegan Python (`@property`)
+## 4. Gaya Elegan Pythonic: Menggunakan Decorator `@property`
 
-### ❌ Cara Kuno Ala Bahasa Java (Kaku & Banyak Kode)
-Di masa lalu, orang membuat fungsi pembuka (`getter`) dan pengubah (`setter`) secara manual:
-```python
-class AkunKuno:
-    def __init__(self, saldo):
-        self._saldo = saldo
-
-    def get_saldo(self):          # Getter kaku
-        return self._saldo
-
-    def set_saldo(self, nilai):   # Setter kaku
-        if nilai >= 0:
-            self._saldo = nilai
-        else:
-            print("Saldo tidak boleh minus!")
-```
-Pengguna harus mengetik: `akun.set_saldo(500000)` dan `print(akun.get_saldo())`. Terasa kaku dan tidak alami di Python!
-
----
-
-### ✅ Gaya Elegan Pythonic: Menggunakan Decorator `@property`
-Python memiliki fitur sakti: kita bisa mengakses method seolah-olah dia adalah variabel biasa!
+Python memiliki cara yang jauh lebih elegan daripada membuat fungsi kaku `get_saldo()` dan `set_saldo()`:
 
 ```python
 class RekeningModern:
@@ -113,38 +92,73 @@ class RekeningModern:
         """Membaca saldo seperti variabel biasa: akun.saldo"""
         return self._saldo
 
-    # 2. SETTER ELEGAN (@saldo.setter): Mengubah data dengan validasi ketat
+    # 2. SETTER ELEGAN (@saldo.setter): Mengubah data dengan validasi tipe & nilai
     @saldo.setter
     def saldo(self, nilai_baru: int):
-        """Dipanggil otomatis saat seseorang menulis: akun.saldo = nilai_baru"""
-        if nilai_baru < 0:
+        if not isinstance(nilai_baru, (int, float)):
+            print("❌ GAGAL: Saldo harus berupa angka!")
+        elif nilai_baru < 0:
             print("❌ GAGAL: Saldo tidak boleh bernilai negatif!")
         else:
-            self._saldo = nilai_baru
+            self._saldo = int(nilai_baru)
             print(f"✅ Saldo berhasil diupdate menjadi: Rp {self._saldo:,}")
+
+    # 3. DELETER ELEGAN (@saldo.deleter): Mengatur aksi saat 'del akun.saldo'
+    @saldo.deleter
+    def saldo(self):
+        print("⚠️ Saldo tidak dihapus, melainkan di-reset ke Rp 0!")
+        self._saldo = 0
 ```
 
 ### Keajaiban Saat Dijalankan:
 ```python
 budi = RekeningModern("Budi", 100_000)
 
-# Membaca saldo (terasa seperti membaca variabel biasa!):
-print(budi.saldo)  # Output: 100000
+print(budi.saldo)        # Output: 100000 (Membaca bersih)
+budi.saldo = -50000      # Ditolak! Saldo tidak boleh negatif
+budi.saldo = "banyak"    # Ditolak! Saldo harus berupa angka
+budi.saldo = 250000      # Berhasil diupdate ke Rp 250,000
 
-# Mencoba mengisi saldo ilegal (minus):
-budi.saldo = -50000  # Otomatis ditolak oleh setter! Output: ❌ GAGAL: Saldo tidak boleh bernilai negatif!
-
-# Mengisi saldo yang valid:
-budi.saldo = 250000  # Output: ✅ Saldo berhasil diupdate menjadi: Rp 250,000
+del budi.saldo           # Deleter aktif: Reset ke 0
+print(budi.saldo)        # Output: 0
 ```
-Sintaksnya bersih seperti variabel biasa (`budi.saldo`), tetapi **keamanannya terjamin 100% oleh fungsi setter di balik layar!**
 
 ---
 
-## 5. Properti Hanya-Baca (Read-Only Property)
+## 5. Kekuatan Super: Computed Property (Atribut Hitungan Otomatis)
 
-Bagaimana jika kita ingin membuat data yang **hanya bisa dibaca tetapi tidak boleh diubah selamanya oleh siapa pun**?  
-Cukup pasang `@property` **tanpa membuat setter-nya**!
+Salah satu kegunaan paling menakjubkan dari `@property` adalah **mencegah data basi / desinkronisasi**:
+
+```python
+class PersegiPanjang:
+    def __init__(self, panjang: float, lebar: float):
+        self.panjang = panjang
+        self.lebar = lebar
+
+    # COMPUTED PROPERTY: Dihitung saat diminta (selalu segar & akurat!)
+    @property
+    def luas(self) -> float:
+        return self.panjang * self.lebar
+
+    @property
+    def keliling(self) -> float:
+        return 2 * (self.panjang + self.lebar)
+```
+
+```python
+kotak = PersegiPanjang(10, 5)
+print(kotak.luas)      # Output: 50
+
+# Jika panjangnya berubah:
+kotak.panjang = 20
+print(kotak.luas)      # Output: 100 (OTOMATIS AKURAT tanpa perlu kita hitung ulang manual!)
+```
+
+---
+
+## 6. Properti Hanya-Baca (Read-Only Property)
+
+Jika Anda ingin data **hanya bisa dibaca tetapi tidak boleh diubah selamanya**, cukup buat `@property` **tanpa membuat setter-nya**:
 
 ```python
 class User:
@@ -157,13 +171,13 @@ class User:
         return self._nik  # Hanya ada getter!
 
 u = User("3201019901010001", "Budi")
-print(u.nik)     # Output: 3201019901010001 (Bisa dibaca)
-u.nik = "123"    # 💥 ERROR: AttributeError: can't set attribute 'nik' (Dilarang diubah!)
+print(u.nik)     # Output: 3201019901010001
+u.nik = "123"    # 💥 ERROR: AttributeError: can't set attribute 'nik'
 ```
 
 ---
 
-## 6. ⚠️ JEBAKAN MAUT PEMULA: Bencana `RecursionError`
+## 7. ⚠️ JEBAKAN MAUT PEMULA: Bencana `RecursionError`
 
 Salah satu error yang paling sering membuat pemula pusing saat belajar `@property` adalah:  
 `RecursionError: maximum recursion depth exceeded`.
@@ -184,7 +198,7 @@ class SalahTotal:
 ```
 
 ### ✅ Cara Menghindarinya:
-Variabel penyimpan data asli **harus memiliki nama yang berbeda** (biasanya diawali satu underscore, misal `_saldo`):
+Variabel penyimpan data fisik di dalam objek **wajib diawali satu garis bawah (`_`)**:
 
 ```python
 @property
@@ -198,74 +212,69 @@ def saldo(self, nilai):
 
 ---
 
-## 7. Diagram Alur Kerja `@property` (Mermaid)
+## 8. Diagram Alur Kerja Trio Property (Mermaid)
 
 ```mermaid
 flowchart TD
     User([Programmer / User])
 
-    subgraph Akses ["Akses Data Rekening"]
-        A["baca: akun.saldo"]
-        B["ubah: akun.saldo = -5000"]
-        C["ubah: akun.saldo = 50000"]
+    subgraph Akses ["Sintaks Sederhana"]
+        A["baca: kotak.luas"]
+        B["ubah: akun.saldo = nilai"]
+        C["hapus: del akun.saldo"]
     end
 
     User --> A
     User --> B
     User --> C
 
-    subgraph Encapsulation ["Proteksi Encapsulation (@property)"]
-        G["@property def saldo()"] --> R["Kembalikan nilai self._saldo"]
-        S["@saldo.setter def saldo(nilai)"]
-        Validasi{"Apakah nilai >= 0?"}
-        S --> Validasi
-        Validasi -- Tidak --> Tolak["❌ Tolak & Cetak Peringatan!"]
-        Validasi -- Ya --> Terima["✅ Simpan ke self._saldo"]
+    subgraph PropertySystem ["Trio Property System"]
+        G["@property (Getter / Computed)"] --> R["Hitung & Kembalikan Nilai Segar"]
+        S["@saldo.setter"] --> Validasi{"Validasi Tipe & Nilai"}
+        Validasi -- Tidak Valid --> Tolak["❌ Tolak & Peringatkan"]
+        Validasi -- Valid --> Terima["✅ Simpan ke self._saldo"]
+        D["@saldo.deleter"] --> Reset["⚠️ Reset Nilai / Proteksi"]
     end
 
     A --> G
     B --> S
-    C --> S
+    C --> D
 ```
 
 ---
 
-## 8. 🎯 Kuis Kilat Cek Pemahaman Mandiri
+## 9. 🎯 Kuis Kilat Cek Pemahaman Mandiri
 
 #### Soal 1:
-> Manakah penulisan atribut di bawah ini yang memicu mekanisme *Name Mangling* di Python?  
-> A. `self.rahasia`  
-> B. `self._rahasia`  
-> C. `self.__rahasia`  
-> D. `self.__rahasia__`  
+> Mengapa membuat atribut `luas` sebagai `@property` lebih baik daripada menghitungnya sekali saja di dalam `__init__` (`self.luas = panjang * lebar`)?
 
 <details>
 <summary>👉 Klik untuk melihat Jawaban Soal 1</summary>
 
-**Jawaban: C (`self.__rahasia`)**  
-*Penjelasan*: Dua garis bawah di awal tanpa garis bawah di akhir memicu Name Mangling menjadi `_NamaClass__rahasia`. Jika ada dua garis bawah di depan dan belakang (D), itu adalah Magic/Dunder method bawaan Python.
+**Jawaban: Mencegah data basi (Desinkronisasi)!**  
+*Penjelasan*: Jika dihitung di `__init__`, saat nilai `panjang` atau `lebar` diubah di kemudian hari, nilai `self.luas` tidak akan ikut berubah. Dengan `@property`, `luas` dihitung secara dinamis kapan pun diakses, sehingga nilainya selalu akurat 100%.
 </details>
 
 ---
 
 #### Soal 2:
-> Bagaimana cara membuat sebuah atribut menjadi **Read-Only** (hanya bisa dibaca dan tidak bisa diubah nilainya)?  
-> A. Pasang decorator `@property` tanpa membuat decorator `@nama.setter`.  
-> B. Menggunakan kata kunci `const`.  
-> C. Menulis nama atribut dengan huruf kapital.  
+> Apa decorator yang digunakan jika kita ingin mengatur apa yang terjadi ketika seseorang mengetik `del objek.saldo`?  
+> A. `@property.delete`  
+> B. `@saldo.deleter`  
+> C. `@delete.saldo`  
 
 <details>
 <summary>👉 Klik untuk melihat Jawaban Soal 2</summary>
 
-**Jawaban: A**  
-*Penjelasan*: Cukup pasang `@property` untuk fungsi getternya saja. Jika ada yang mencoba mengubah nilainya (`objek.atribut = ...`), Python otomatis menolak dengan error `AttributeError: can't set attribute`.
+**Jawaban: B (`@saldo.deleter`)**  
+*Penjelasan*: Format decorator deleter di Python selalu mengikuti nama fungsinya: `@nama_property.deleter`.
 </details>
 
 ---
 
-## 9. 🛠️ Berkas Latihan di Modul Ini
+## 10. 🛠️ Berkas Latihan di Modul Ini
 Silakan buka dan jalankan file berikut di terminal:
 1. `01_dasar_encapsulation.py` $\rightarrow$ Praktik Public, Protected, Private, dan pembuktian Name Mangling.
-2. `02_property_decorator.py` $\rightarrow$ Praktik modern `@property`, setter validasi, read-only property, dan simulasi RecursionError.
+2. `02_property_decorator.py` $\rightarrow$ Praktik modern `@property`, setter validasi tipe/nilai, read-only, deleter, dan computed property.
 3. `03_latihan_mandiri.py` $\rightarrow$ Tantangan membuat sistem Dompet Digital (E-Wallet) aman.
 4. `03_solusi_latihan.py` $\rightarrow$ Kunci jawaban lengkap latihan.
