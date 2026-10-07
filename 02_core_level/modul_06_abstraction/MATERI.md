@@ -1,6 +1,6 @@
 # 🔌 MODUL 6: PILAR 4 – ABSTRACTION (MENYEMBUNYIKAN KERUMITAN & KONTRAK WAJIB)
 > **Tingkat**: Core Level (Pilar Penutup 4 Pilar OOP)  
-> **Tujuan**: Memahami esensi **Abstraction**, membedakan secara tegas *Encapsulation vs Abstraction*, menguasai modul bawaan `abc` (`ABC` & `@abstractmethod`), memanfaatkan *Abstract Property*, serta memahami peran *Interface* di Python.
+> **Tujuan**: Memahami esensi **Abstraction**, membedakan secara tegas *Encapsulation vs Abstraction*, menguasai modul bawaan `abc` (`ABC` & `@abstractmethod`), memadukan method konkret & method abstrak, memanfaatkan *Abstract Property*, serta memahami peran *Interface* di Python.
 
 ---
 
@@ -78,14 +78,20 @@ class Pembayaran(ABC):
 
 ---
 
-## 4. Contoh Nyata: Standar Driver Database 🗄️
+## 4. Rahasia Penting: Kelas Abstrak Boleh Memiliki Method Konkret (Sudah Ada Isinya!) 🛠️
 
-Bayangkan Anda memimpin tim developer untuk membuat sistem yang bisa berganti database dengan mudah (MySQL, PostgreSQL, SQLite):
+Salah satu kesalahpahaman pemula adalah mengira semua method di kelas abstrak harus kosong (`pass`).  
+**Faktanya**: Kelas abstrak boleh menyediakan fungsi siap pakai yang berlaku umum untuk semua anak!
 
 ```python
 from abc import ABC, abstractmethod
 
 class DriverDatabase(ABC):
+    # 1. METHOD KONKRET (Sudah ada isinya, anak tidak wajib menimpa):
+    def catat_log(self, aktivitas: str):
+        print(f"[LOG AUDIT SISTEM]: {aktivitas}")
+
+    # 2. METHOD ABSTRAK (Kontrak wajib diisi anak):
     @abstractmethod
     def konek(self):
         pass
@@ -93,25 +99,8 @@ class DriverDatabase(ABC):
     @abstractmethod
     def eksekusi_query(self, query: str):
         pass
-
-    @abstractmethod
-    def putus_koneksi(self):
-        pass
 ```
-
-### Mengisi Kontrak di Kelas Nyata (Concrete Class):
-```python
-class MySQLDriver(DriverDatabase):
-    def konek(self):
-        print("[MySQL] Terhubung ke port 3306...")
-
-    def eksekusi_query(self, query: str):
-        print(f"[MySQL] Menjalankan query SQL: {query}")
-
-    def putus_koneksi(self):
-        print("[MySQL] Koneksi ditutup dengan aman.")
-```
-Jika seorang anak (misal `PostgreSQLDriver`) lupa menulis `putus_koneksi()`, Python **akan langsung menegurnya** saat objek hendak dibuat. Ini menjamin kode tim Anda 100% patuh pada standar!
+Anak otomatis mendapatkan kemampuan `catat_log()` secara gratis, tetapi tetap dipaksa mengisi `konek()` dan `eksekusi_query()`. Inilah kekuatan gabungan Abstraksi dan Pewarisan!
 
 ---
 
@@ -157,9 +146,10 @@ Di Python:
 classDiagram
     class DriverDatabase {
         <<Abstract>>
-        +konek()*
-        +eksekusi_query(query)*
-        +putus_koneksi()*
+        +catat_log(aktivitas) [Konkret]
+        +konek()* [Abstrak]
+        +eksekusi_query(query)* [Abstrak]
+        +putus_koneksi()* [Abstrak]
     }
 
     class MySQLDriver {
@@ -203,16 +193,16 @@ driver = DriverDatabase()  # 💥 TypeError!
 ## 9. 🎯 Kuis Kilat Cek Pemahaman Mandiri
 
 #### Soal 1:
-> Apa yang terjadi jika kelas `Kucing` mewarisi kelas abstrak `Hewan(ABC)` yang memiliki `@abstractmethod def bersuara(self):`, tetapi programmer lupa menulis fungsi `bersuara()` di kelas `Kucing`?  
-> A. Kucing akan bersuara hening secara otomatis.  
-> B. Python akan melempar pesan error `TypeError` saat kita mencoba melahirkan objek `k = Kucing()`.  
-> C. Program akan berjalan normal tanpa masalah.  
+> Apakah sebuah Abstract Base Class di Python boleh memiliki method yang sudah ada baris kodingannya (tidak cuma `pass`)?  
+> A. Boleh sekali! Itu disebut method konkret yang bisa langsung diwarisi anak.  
+> B. Tidak boleh, semua fungsi harus berupa `@abstractmethod`.  
+> C. Hanya boleh jika fungsi tersebut bernama `main()`.  
 
 <details>
 <summary>👉 Klik untuk melihat Jawaban Soal 1</summary>
 
-**Jawaban: B**  
-*Penjelasan*: Python akan langsung mencegah instansiasi dan memunculkan error: `TypeError: Can't instantiate abstract class Kucing with abstract method bersuara`. Ini adalah mekanisme proteksi Python agar programmer tidak lupa membuat fungsi wajib.
+**Jawaban: A**  
+*Penjelasan*: Kelas abstrak sangat boleh memiliki method konkret yang sudah berfungsi penuh. Fungsinya adalah membagikan kode bersama kepada semua kelas anak, sambil tetap mewajibkan beberapa method khusus diisi oleh anak lewat `@abstractmethod`.
 </details>
 
 ---
@@ -234,7 +224,7 @@ driver = DriverDatabase()  # 💥 TypeError!
 
 ## 10. 🛠️ Berkas Latihan di Modul Ini
 Silakan buka dan jalankan file berikut di terminal:
-1. `01_dasar_abstraction.py` $\rightarrow$ Praktik pembuatan `DriverDatabase`, kepatuhan kontrak, dan simulasi penolakan `TypeError`.
+1. `01_dasar_abstraction.py` $\rightarrow$ Praktik pembuatan `DriverDatabase`, method konkret vs method abstrak, kepatuhan kontrak, dan simulasi `TypeError`.
 2. `02_abstract_property.py` $\rightarrow$ Praktik Abstract Property (`@property` + `@abstractmethod`) pada armada transportasi publik.
 3. `03_latihan_mandiri.py` $\rightarrow$ Tantangan membuat Sistem Notifikasi Omnichannel (Email, SMS, WhatsApp).
 4. `03_solusi_latihan.py` $\rightarrow$ Kunci jawaban lengkap latihan.

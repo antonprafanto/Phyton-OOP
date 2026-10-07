@@ -4,9 +4,10 @@
 Modul 6: Pilar 4 – Abstraction (Menyembunyikan Kerumitan dengan abc)
 
 File ini mendemonstrasikan:
-1. Pembuatan Abstract Base Class (ABC) dan decorator @abstractmethod
-2. Pembuatan Concrete Class (Kelas Konkret) yang mematuhi kontrak
-3. Simulasi penolakan Python (TypeError) saat kontrak dilanggar
+1. Pembuatan Abstract Base Class (ABC) dengan decorator @abstractmethod
+2. Perpaduan Method Konkret (sudah ada isi) dan Method Abstrak (kontrak wajib)
+3. Pembuatan Concrete Class (Kelas Konkret) yang mematuhi kontrak
+4. Simulasi penolakan Python (TypeError) saat kontrak dilanggar
 """
 import sys
 from abc import ABC, abstractmethod
@@ -22,26 +23,31 @@ print("[DEMO] ABSTRACTION & KONTRAK KERJA BAKU DENGAN MODUL ABC")
 print("=" * 60)
 
 # ==============================================================
-# 1. KELAS ABSTRAK (SURAT KONTRAK KERJA INDUK)
+# 1. KELAS ABSTRAK DENGAN METHOD KONKRET & METHOD ABSTRAK
 # ==============================================================
 class DriverDatabase(ABC):
     """
     Kelas Abstrak: Tidak boleh dilahirkan sebagai objek.
     Berfungsi sebagai standar kontrak wajib bagi seluruh driver database.
     """
+    def __init__(self, nama_driver: str):
+        self.nama_driver = nama_driver
+
+    # A. METHOD KONKRET (Fitur bawaan yang siap dipakai semua anak):
+    def catat_log(self, pesan: str):
+        print(f"[AUDIT LOG {self.nama_driver}]: {pesan}")
+
+    # B. METHOD ABSTRAK (Kontrak wajib yang HARUS diisi setiap anak):
     @abstractmethod
     def konek(self):
-        """Wajib diimplementasikan oleh setiap anak!"""
         pass
 
     @abstractmethod
     def eksekusi_query(self, query: str):
-        """Wajib diimplementasikan oleh setiap anak!"""
         pass
 
     @abstractmethod
     def putus_koneksi(self):
-        """Wajib diimplementasikan oleh setiap anak!"""
         pass
 
 
@@ -50,23 +56,31 @@ class DriverDatabase(ABC):
 # ==============================================================
 class MySQLDriver(DriverDatabase):
     def __init__(self, host: str, user: str):
+        super().__init__("MySQL")
         self.host = host
         self.user = user
 
     def konek(self):
-        print(f"[MySQL] Terhubung ke server {self.host} sebagai '{self.user}' pada port 3306.")
+        # Memanfaatkan method konkret warisan orang tua:
+        self.catat_log("Membuka sambungan TCP...")
+        print(f"[MySQL] Terhubung ke {self.host} sebagai '{self.user}' pada port 3306.")
 
     def eksekusi_query(self, query: str):
-        print(f"[MySQL] Menjalankan: '{query}' -> Berhasil!")
+        self.catat_log(f"Menjalankan query: {query}")
+        print(f"[MySQL] Hasil dieksekusi: 10 baris data dikembalikan.")
 
     def putus_koneksi(self):
-        print("[MySQL] Sesi koneksi ditutup dengan tertib.")
+        self.catat_log("Menutup sesi koneksi.")
+        print("[MySQL] Koneksi ditutup dengan aman.")
 
 
 # ==============================================================
 # 3. KELAS YANG MELANGGAR KONTRAK (LUPA SATU METHOD)
 # ==============================================================
 class DriverMalas(DriverDatabase):
+    def __init__(self):
+        super().__init__("Malas")
+
     def konek(self):
         print("[Malas] Konek...")
 
@@ -85,7 +99,7 @@ db.putus_koneksi()
 
 print("\n--- 2. Eksperimen: Mencoba Melahirkan Objek Langsung dari Kelas Abstrak ---")
 try:
-    objek_abstrak = DriverDatabase()
+    objek_abstrak = DriverDatabase("Dummy")
 except TypeError as err:
     print(f"[DITOLAK PYTHON] Pesan Error:\n>>> {err}")
     print("Alasan: Kelas abstrak adalah ide/konsep, tidak boleh ada wujud fisiknya!")
