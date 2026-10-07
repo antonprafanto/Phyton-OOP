@@ -1,6 +1,6 @@
 # 🏷️ MODUL 2: VARIABEL MILIK SIAPA?
 > **Tingkat**: Zero Level (Fondasi Arsitektur Data)  
-> **Tujuan**: Memahami perbedaan mutlak antara **Instance Attribute** (milik pribadi objek) dan **Class Attribute** (milik bersama seluruh cetakan), serta mewaspadai jebakan fatal "kebocoran data antarpengguna".
+> **Tujuan**: Memahami perbedaan mutlak antara **Instance Attribute** (milik pribadi objek) dan **Class Attribute** (milik bersama seluruh cetakan), membongkar misteri pencarian atribut dengan `__dict__`, menghindari jebakan "Shadowing", serta mencegah kebocoran data antarpengguna.
 
 ---
 
@@ -41,7 +41,8 @@ Perhatikan di mana variabel tersebut diletakkan:
 class Siswa:
     # 1. CLASS ATTRIBUTE: Ditulis langsung di dalam class (di luar fungsi)
     nama_sekolah = "SMA Nusantara"
-    total_siswa = 0  # Bisa dipakai untuk menghitung berapa murid yang sudah terdaftar!
+    PAJAK_KOPERASI = 0.05  # Konvensi HURUF BESAR untuk konstanta yang bernilai tetap!
+    total_siswa = 0        # Bisa dipakai untuk menghitung total murid yang sudah terdaftar!
 
     def __init__(self, nama: str, uang_saku: int):
         # 2. INSTANCE ATTRIBUTE: Ditulis di dalam __init__ dengan awalan self.
@@ -69,19 +70,48 @@ print(Siswa.total_siswa)   # Output: 2 (Otomatis terhitung ada 2 murid!)
 
 ---
 
-## 3. Tabel Perbandingan Cepat
+## 3. Melihat "Isi Kantong" Objek dengan `__dict__` 🎒
 
-| Pembeda | Instance Attribute (`self.variabel`) | Class Attribute (`Class.variabel`) |
-| :--- | :--- | :--- |
-| **Lokasi Penulisan** | Di dalam `__init__()` (atau method) | Langsung di tubuh `class` (di luar method) |
-| **Kepemilikan** | Milik spesifik satu objek individu | Milik bersama seluruh objek dari class tersebut |
-| **Nilai di Memori** | Unik / berbeda untuk setiap objek | Mengarah ke satu nilai yang sama di memori |
-| **Cara Akses Terbaik** | `nama_objek.variabel` | `NamaClass.variabel` |
-| **Kegunaan Populer** | Nama, saldo, umur, koordinat, password | Menghitung total objek, nilai konstanta (PI, PPN, UMR, Nama Bank) |
+Bagaimana cara Python tahu variabel mana yang milik objek dan mana yang milik kelas?  
+Python menyimpannya dalam kamus tersembunyi bernama `__dict__`:
+
+```python
+print(murid1.__dict__)
+# Output: {'nama': 'Budi', 'uang_saku': 20000}
+```
+
+Perhatikan! Di dalam `murid1.__dict__`, **TIDAK ADA** variabel `nama_sekolah`.  
+*Lalu kenapa `murid1.nama_sekolah` bisa dicetak?*  
+Inilah cara kerja **Hierarki Pencarian Python (Attribute Lookup)**:
+1. Python memeriksa kantong pribadi objek (`murid1.__dict__`). Jika ketemu, pakai itu!
+2. Jika tidak ada di kantong pribadi, Python naik ke atas mencari di lemari kelas (`Siswa.__dict__`).
+3. Jika di lemari kelas juga tidak ada, barulah Python memunculkan pesan error `AttributeError`.
 
 ---
 
-## 4. ⚠️ JEBAKAN MAUT PEMULA: Bencana Kebocoran Data (Shared Mutable Leak)
+## 4. ⚠️ Awas Jebakan "Shadowing" (Menimpa Variabel Tanpa Sengaja)
+
+Apa yang terjadi jika Anda ingin mengubah nama sekolah, tetapi salah menulis `self` alih-alih `Siswa`?
+
+```python
+# ❌ KESALAHAN UMUM:
+murid1.nama_sekolah = "SMA Bintang Jaya"
+
+print(murid1.nama_sekolah)  # Output: SMA Bintang Jaya
+print(murid2.nama_sekolah)  # Output: SMA Nusantara (Loh, murid 2 kok tidak ikut berubah?)
+print(Siswa.nama_sekolah)   # Output: SMA Nusantara (Sekolah aslinya juga tidak berubah!)
+```
+
+**Mengapa ini terjadi?**  
+Karena perintah `murid1.nama_sekolah = ...` tidak mengubah nilai di Class, melainkan membuat variabel baru di kantong pribadi `murid1` yang "membayangi" (*shadowing*) variabel aslinya!
+
+> **Aturan Emas**:  
+> Jika Anda bermaksud mengubah Class Attribute untuk **seluruh objek**, selalu panggil nama kelasnya langsung:  
+> `Siswa.nama_sekolah = "SMA Bintang Jaya"` ✅
+
+---
+
+## 5. ⚠️ BENCANA BESAR: Kebocoran Data (Shared Mutable Leak)
 
 Ini adalah salah satu bug paling berbahaya di Python yang sering membuat pemula frustrasi berhari-hari!
 
@@ -130,12 +160,26 @@ class AkunBelanjaBenar:
 
 ---
 
-## 5. Visualisasi Alur Memori (Mermaid)
+## 6. Tabel Perbandingan Cepat
+
+| Pembeda | Instance Attribute (`self.variabel`) | Class Attribute (`Class.variabel`) |
+| :--- | :--- | :--- |
+| **Lokasi Penulisan** | Di dalam `__init__()` (atau method) | Langsung di tubuh `class` (di luar method) |
+| **Kepemilikan** | Milik spesifik satu objek individu | Milik bersama seluruh objek dari class tersebut |
+| **Penyimpanan** | Masuk ke `objek.__dict__` | Masuk ke `Class.__dict__` |
+| **Cara Ubah Data** | `nama_objek.variabel = ...` | `NamaClass.variabel = ...` |
+| **Konvensi Nama** | Huruf kecil (`self.saldo`) | Huruf besar jika konstan (`Class.PAJAK`) |
+| **Kegunaan Populer** | Nama, saldo, umur, koordinat, password | Menghitung total objek, nilai konstanta (PPN, UMR, Server IP) |
+
+---
+
+## 7. Visualisasi Alur Memori (Mermaid)
 
 ```mermaid
 classDiagram
     class Siswa {
         +String nama_sekolah = "SMA Nusantara"
+        +float PAJAK_KOPERASI = 0.05
         +int total_siswa = 2
     }
 
@@ -149,67 +193,43 @@ classDiagram
         +int uang_saku = 50000
     }
 
-    Siswa <|-- MuridBudi : Menginduk ke Class
-    Siswa <|-- MuridSiti : Menginduk ke Class
+    Siswa <|-- MuridBudi : Attribute Lookup (Jika tidak ada di objek)
+    Siswa <|-- MuridSiti : Attribute Lookup (Jika tidak ada di objek)
 ```
 
 ---
 
-## 6. Apa yang Terjadi Jika Kita Menimpa Class Attribute dari Objek?
-
-Ini juga salah satu keunikan Python yang wajib Anda ketahui:
-
-```python
-class Mobil:
-    roda = 4  # Class attribute
-
-m1 = Mobil()
-m2 = Mobil()
-
-# Jika kita menimpa lewat objek m1:
-m1.roda = 3  # (Misal: bemo roda 3)
-
-print(m1.roda)     # Output: 3 (Hanya m1 yang berubah, membuat instance attribute bayangan)
-print(m2.roda)     # Output: 4 (m2 tetap aman menggunakan nilai bawaan class)
-print(Mobil.roda)  # Output: 4 (Nilai cetakan aslinya tidak rusak)
-```
-
----
-
-## 7. 🎯 Kuis Kilat Cek Pemahaman Mandiri
+## 8. 🎯 Kuis Kilat Cek Pemahaman Mandiri
 
 #### Soal 1:
-> Kita ingin membuat aplikasi perbankan. Ada dua variabel: `suku_bunga_tahunan = 0.05` dan `saldo = 500000`.  
+> Kita ingin membuat aplikasi perbankan. Ada dua variabel: `SUKU_BUNGA_TAHUNAN = 0.05` dan `saldo = 500000`.  
 > Manakah yang sebaiknya dijadikan **Class Attribute**, dan mana yang **Instance Attribute**?
 
 <details>
 <summary>👉 Klik untuk melihat Jawaban Soal 1</summary>
 
 **Jawaban:**  
-* `suku_bunga_tahunan` $\rightarrow$ **Class Attribute** (karena bunga standar bank berlaku sama untuk seluruh nasabah).  
+* `SUKU_BUNGA_TAHUNAN` $\rightarrow$ **Class Attribute** (karena bunga standar bank berlaku sama untuk seluruh nasabah, dan ditulis huruf besar karena konstan).  
 * `saldo` $\rightarrow$ **Instance Attribute** (karena saldo adalah rahasia pribadi masing-masing nasabah yang berbeda-beda).
 </details>
 
 ---
 
 #### Soal 2:
-> Kapan kita boleh meletakkan tipe data `list` atau `dict` langsung di badan class (Class Attribute)?  
-> A. Kapan saja, tidak ada bedanya.  
-> B. Hanya jika list tersebut memang ditujukan untuk dipakai bersama (misal: daftar cabang resmi kantor).  
-> C. Tidak pernah boleh sama sekali.  
+> Jika kita mengeksekusi `print(objek.__dict__)`, apakah Class Attribute akan muncul di dalam kamus tersebut?
 
 <details>
 <summary>👉 Klik untuk melihat Jawaban Soal 2</summary>
 
-**Jawaban: B**  
-*Penjelasan*: Boleh jika datanya memang bersifat global/kolektif untuk semua objek (seperti daftar cabang kantor atau daftar server pusat). Namun jika datanya milik pribadi objek (seperti riwayat transaksi, barang belanjaan, atau inventaris), wajib ditaruh di dalam `__init__`.
+**Jawaban: Tidak!**  
+*Penjelasan*: `objek.__dict__` hanya berisi variabel-variabel pribadi (Instance Attributes) yang menempel langsung pada objek tersebut. Class Attribute tersimpan terpisah di `NamaClass.__dict__`.
 </details>
 
 ---
 
-## 8. 🛠️ Berkas Latihan di Modul Ini
+## 9. 🛠️ Berkas Latihan di Modul Ini
 Silakan buka dan jalankan file berikut di terminal:
-1. `01_instance_vs_class_attr.py` $\rightarrow$ Praktik menghitung total objek otomatis dengan Class Attribute.
-2. `02_jebakan_kebocoran_data.py` $\rightarrow$ Demonstrasi nyata kebocoran data keranjang belanja dan solusinya.
+1. `01_instance_vs_class_attr.py` $\rightarrow$ Praktik menghitung objek, bedah `__dict__`, dan bedah jebakan "Shadowing".
+2. `02_jebakan_kebocoran_data.py` $\rightarrow$ Demonstrasi nyata kebocoran keranjang belanja dan solusinya.
 3. `03_latihan_mandiri.py` $\rightarrow$ Tantangan membuat sistem Manajemen Karyawan Perusahaan.
 4. `03_solusi_latihan.py` $\rightarrow$ Kunci jawaban lengkap latihan.
