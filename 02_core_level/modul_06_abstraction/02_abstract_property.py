@@ -68,7 +68,8 @@ class BusKotaLupa(TransportasiPublik):
     pass  # Lupa mendefinisikan properti tarif_per_km!
 
 try:
-    bus = BusKotaLupa("TransKota")
+    kelas_lupa: type = BusKotaLupa
+    bus = kelas_lupa("TransKota")  # type: ignore
 except TypeError as err:
     print(f"[DITOLAK] Pesan Error:\n>>> {err}")
     print("Python mendeteksi bahwa BusKotaLupa belum menentukan tarif_per_km!")

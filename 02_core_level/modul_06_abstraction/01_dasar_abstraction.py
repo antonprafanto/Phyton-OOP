@@ -99,14 +99,18 @@ db.putus_koneksi()
 
 print("\n--- 2. Eksperimen: Mencoba Melahirkan Objek Langsung dari Kelas Abstrak ---")
 try:
-    objek_abstrak = DriverDatabase("Dummy")
+    # Catatan: Linter IDE (seperti Pyrefly) secara cerdas mendeteksi bahwa kelas ini abstrak
+    # sebelum program dijalankan. Kita gunakan type ignore untuk keperluan demonstrasi runtime:
+    kelas_target: type = DriverDatabase
+    objek_abstrak = kelas_target("Dummy")  # type: ignore
 except TypeError as err:
     print(f"[DITOLAK PYTHON] Pesan Error:\n>>> {err}")
     print("Alasan: Kelas abstrak adalah ide/konsep, tidak boleh ada wujud fisiknya!")
 
 print("\n--- 3. Eksperimen: Mencoba Melahirkan Driver yang Lupa 1 Kontrak ---")
 try:
-    driver_cacat = DriverMalas()
+    kelas_cacat: type = DriverMalas
+    driver_cacat = kelas_cacat()  # type: ignore
 except TypeError as err:
     print(f"[DITOLAK PYTHON] Pesan Error:\n>>> {err}")
     print("Alasan: Python mendeteksi bahwa DriverMalas lupa menulis method 'putus_koneksi'!")
