@@ -15,7 +15,7 @@ Gunakan daftar centang di bawah ini untuk memantau perjalanan belajar kita agar 
 | [x] | **Modul 1** | Melahirkan Objek Pertama (Class, Object, Constructor, & `self`) | Zero |
 | [x] | **Modul 2** | Variabel Milik Siapa? (Instance Attribute vs Class Attribute) | Zero |
 | [x] | **Modul 3** | Pilar 1: Encapsulation & Gaya Elegan `@property` | Core |
-| [ ] | **Modul 4** | Pilar 2: Inheritance (Pewarisan, `super()`, & Multiple Inheritance) | Core |
+| [x] | **Modul 4** | Pilar 2: Inheritance (Pewarisan, `super()`, & Multiple Inheritance) | Core |
 | [ ] | **Modul 5** | Pilar 3: Polymorphism & Filosofi *Duck Typing* | Core |
 | [ ] | **Modul 6** | Pilar 4: Abstraction (Menyembunyikan Kerumitan dengan `abc`) | Core |
 | [ ] | **Modul 7** | Python Superpowers: Magic / Dunder Methods (`__str__`, `__eq__`, dll.) | Intermediate |
