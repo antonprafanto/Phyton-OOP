@@ -12,7 +12,7 @@ Gunakan daftar centang di bawah ini untuk memantau perjalanan belajar kita agar 
 | Status | Modul | Topik Utama | Tingkat |
 | :---: | :--- | :--- | :---: |
 | [x] | **Modul 0** | Mengapa Butuh OOP? (Mental Model Dunia Nyata) | Zero |
-| [ ] | **Modul 1** | Melahirkan Objek Pertama (Class, Object, Constructor, & `self`) | Zero |
+| [x] | **Modul 1** | Melahirkan Objek Pertama (Class, Object, Constructor, & `self`) | Zero |
 | [ ] | **Modul 2** | Variabel Milik Siapa? (Instance Attribute vs Class Attribute) | Zero |
 | [ ] | **Modul 3** | Pilar 1: Encapsulation & Gaya Elegan `@property` | Core |
 | [ ] | **Modul 4** | Pilar 2: Inheritance (Pewarisan, `super()`, & Multiple Inheritance) | Core |
