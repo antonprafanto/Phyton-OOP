@@ -24,7 +24,7 @@ Untuk melihat silabus super lengkap dan memantau status belajar secara detail, s
 
 | Level | Modul | Topik Bahasan | Fokus Utama |
 | :---: | :--- | :--- | :--- |
-| **Fase 1** | **Modul 0** | Mengapa Butuh OOP? | Mental Model, Perbedaan Prosedural vs OOP, Atribut & Method |
+| **Fase 1** | [**Modul 0**](01_zero_level/modul_00_mengapa_oop/MATERI.md) | Mengapa Butuh OOP? | Mental Model, Perbedaan Prosedural vs OOP, Atribut & Method |
 | *(Zero)* | **Modul 1** | Melahirkan Objek Pertama | `class`, Object/Instance, Constructor `__init__`, dan Rahasia `self` |
 | | **Modul 2** | Variabel Milik Siapa? | Instance Attribute vs Class Attribute (Awas kebocoran data!) |
 | **Fase 2** | **Modul 3** | Pilar 1: Encapsulation | Proteksi Data, Public/Private, dan Gaya Elegan `@property` |
