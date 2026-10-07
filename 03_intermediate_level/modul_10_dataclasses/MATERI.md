@@ -245,6 +245,27 @@ a = Anggota(umur="dua puluh")  # Nilainya tetap diterima sebagai string!
 ```
 Jika Anda butuh validasi tipe data yang ketat, lakukan pengecekan di dalam method `__post_init__()` menggunakan `isinstance()`.
 
+### ❌ Jebakan 4: Mengisi Nilai di `__post_init__` pada Dataclass yang `frozen=True`
+Jika class diberi parameter `frozen=True`, Anda tidak bisa mengisi field `init=False` dengan cara biasa `self.total = ...` di dalam `__post_init__`, karena Python akan melempar `FrozenInstanceError`!
+```python
+# CARA BIASA (ERROR PADA FROZEN):
+@dataclass(frozen=True)
+class Tagihan:
+    jumlah: int
+    pajak: int = field(init=False)
+
+    def __post_init__(self):
+        self.pajak = self.jumlah * 0.1  # 💥 FrozenInstanceError!
+
+# SOLUSI RESMI PYTHONIC:
+    def __post_init__(self):
+        object.__setattr__(self, "pajak", int(self.jumlah * 0.1))  # ✅ Berhasil!
+```
+
+### ❌ Jebakan 5: Menganggap Semua Class Harus Dijadikan Dataclass
+`@dataclass` dirancang khusus untuk class yang fokus utamanya adalah **menyimpan wadah data** (*Data Containers / DTO / Models*).  
+Jika class Anda memiliki logika bisnis operasional yang sangat rumit, mengelola siklus hidup koneksi hardware/database, atau memiliki banyak atribut private yang dinamis, class Python standar (konvensional) seringkali lebih fleksibel dan tepat.
+
 ---
 
 ## 🧠 6. Kuis Uji Pemahaman
