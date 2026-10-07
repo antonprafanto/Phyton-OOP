@@ -176,7 +176,32 @@ except BankAppError as e:
 
 ---
 
-## ⚠️ 5. Awas Jebakan Pemula! (Common Pitfalls)
+---
+
+## 🔄 5. Siklus Lengkap Penanganan Error: `try` ... `except` ... `else` ... `finally`
+
+Banyak pemula hanya tahu `try` dan `except`. Padahal Python menyediakan 4 blok terpadu yang sangat rapi:
+
+```mermaid
+flowchart TD
+    A[Mulai Jalankan Kode di blok 'try'] --> B{Apakah Terjadi Error?}
+    B -->|YA, Terjadi Error| C[Masuk ke blok 'except'\nTangani Sesuai Tipe Class Error]
+    B -->|TIDAK, Sukses 100%| D[Masuk ke blok 'else'\nJalankan Aksi Lanjutan]
+    C --> E[Masuk ke blok 'finally'\nSELALU Dijalankan!]
+    D --> E
+    E --> F[Selesai / Lanjut ke Baris Berikutnya]
+```
+
+* **`try`**: Tempat kode utama yang berisiko dijalankan.
+* **`except`**: Dieksekusi **HANYA JIKA** terjadi error tertentu.
+* **`else`**: Dieksekusi **HANYA JIKA TIDAK ADA** error sama sekali di blok `try`. Sangat bersih untuk memisahkan kode normal dari kode penyelamat.
+* **`finally`**: **SELALU** dieksekusi apapun yang terjadi (baik sukses maupun error). Ideal untuk menutup file, memutuskan koneksi database, atau melepas *lock* memori.
+
+---
+
+## ⚠️ 6. Awas Jebakan Pemula! (Common Pitfalls)
+
+Berikut adalah kesalahan-kesalahan yang paling sering ditemui dalam penanganan exception:
 
 ### ❌ Jebakan 1: *Blanket Except* (`except Exception:` atau `except: pass`)
 Ini adalah dosa terbesar pemula dalam penanganan error:
@@ -188,20 +213,49 @@ except Exception:
     pass  # Menelan SEMUA error tanpa jejak!
 ```
 **Mengapa berbahaya?**  
-Jika ada salah ketik variabel (`NameError`), pembagian dengan nol (`ZeroDivisionError`), atau bug logika, program Anda akan diam seribu bahasa (*silent failure*) dan Anda akan pusing mencari di mana letak kerusakannya selama berhari-hari!  
+Jika ada salah ketik nama variabel (`NameError`), pembagian dengan nol (`ZeroDivisionError`), atau bug logika, program Anda akan diam seribu bahasa (*silent failure*) dan Anda akan pusing mencari di mana letak kerusakannya selama berhari-hari!  
 *Solusi:* Tangkaplah exception yang Anda antisipasi saja, atau minimal cetak/catat pesan lognya.
 
-### ❌ Jebakan 2: Mewarisi `BaseException` Bukannya `Exception`
+### ❌ Jebakan 2: Urutan Blok `except` Terbalik (Induk Ditulis Sebelum Anak)
+Di Python, blok `except` dievaluasi dari atas ke bawah. Jika class induk ditaruh paling atas, class anak tidak akan pernah tersentuh (*unreachable code*)!
+```python
+# SALAH (SaldoTidakCukupError tidak akan pernah terpanggil!):
+try:
+    akun.tarik_uang(1_000_000)
+except BankAppError:          # Karena ini induk, semua error tertelan di sini!
+    print("Ada masalah di bank.")
+except SaldoTidakCukupError:  # ⚠️ DEAD CODE! Tidak akan pernah dieksekusi!
+    print("Saldo kurang.")
+
+# BENAR (Spesifik/Anak DULU, baru Umum/Induk):
+try:
+    akun.tarik_uang(1_000_000)
+except SaldoTidakCukupError:  # Tangani yang paling spesifik dulu
+    print("Saldo kurang.")
+except BankAppError:          # Fallback untuk error bank lainnya
+    print("Ada masalah di bank.")
+```
+
+### ❌ Jebakan 3: Mewarisi `BaseException` Bukannya `Exception`
 Di Python, akar paling atas adalah `BaseException`, yang membawahi `KeyboardInterrupt` (saat user menekan `Ctrl+C` di terminal) dan `SystemExit`.
 * Jangan warisi `BaseException`!
 * **Selalu warisi class `Exception`**. Jika Anda mewarisi `BaseException`, aplikasi Anda tidak bisa dihentikan dengan `Ctrl+C` saat error terjadi.
 
-### ❌ Jebakan 3: Lupa Memanggil `super().__init__(pesan)`
-Jika Anda membuat `__init__` kustom di dalam class exception, jangan lupa meneruskan string pesan ke `super().__init__(pesan)` agar fungsi bawaan seperti `str(e)` dan `print(e)` tetap bisa menampilkan teks error dengan benar.
+### ❌ Jebakan 4: Lupa Memanggil `super().__init__(pesan)`
+Jika Anda membuat `__init__` kustom di dalam class exception, jangan lupa meneruskan string pesan ke `super().__init__(pesan)` agar fungsi bawaan seperti `str(e)` dan `print(e)` tetap bisa menampilkan teks deskripsi error.
+
+### ❌ Jebakan 5: Melempar Exception Tanpa Kata Kunci `raise`
+```python
+# SALAH:
+SaldoTidakCukupError("Saldo kurang")  # Hanya menciptakan objek nganggur di RAM!
+
+# BENAR:
+raise SaldoTidakCukupError("Saldo kurang")  # Melempar error ke sistem
+```
 
 ---
 
-## 🧠 6. Kuis Uji Pemahaman
+## 🧠 7. Kuis Uji Pemahaman
 
 1. **Mengapa menangkap error dengan `except SaldoKurangError:` jauh lebih baik daripada memeriksa teks `if "saldo" in str(e):`?**
 <details>
@@ -215,10 +269,16 @@ Karena pemeriksaan berbasis class bersifat <strong>kebal terhadap perubahan teks
 Blok tersebut <strong>akan tetap berhasil menangkap `SaldoKurangError`</strong> karena sifat pewarisan (Polymorphism: Objek anak adalah instansi dari induknya).
 </details>
 
-3. **Mengapa kita tidak boleh membiasakan menulis `except: pass` (Blanket Except)?**
+3. **Mengapa dalam blok `try...except`, exception yang lebih spesifik (anak) harus ditaruh di atas exception yang lebih umum (induk)?**
 <details>
 <summary>👁️ Lihat Jawaban</summary>
-Karena dapat menelan seluruh jenis error secara diam-diam termasuk bug sintaks, salah nama variabel, atau kegagalan fatal sistem, sehingga membuat proses pelacakan bug (debugging) menjadi sangat sulit.
+Karena Python membaca blok `except` dari <strong>atas ke bawah</strong>. Jika induk ditaruh lebih dulu, semua exception turunannya akan langsung diserap oleh blok induk tersebut, sehingga blok anak di bawahnya tidak akan pernah dieksekusi (*unreachable code*).
+</details>
+
+4. **Kapan blok `else` pada struktur `try...except...else...finally` akan dijalankan?**
+<details>
+<summary>👁️ Lihat Jawaban</summary>
+Blok <code>else</code> HANYA akan dijalankan jika blok <code>try</code> selesai dieksekusi <strong>secara sukses tanpa ada satu pun error yang terjadi</strong>.
 </details>
 
 ---
@@ -229,3 +289,4 @@ Silakan pelajari dan jalankan berkas-berkas berikut secara bertahap:
 2. [`02_hierarki_dan_metadata_error.py`](file:///c:/Users/anton/vibecoding/OOP/03_intermediate_level/modul_09_custom_exceptions/02_hierarki_dan_metadata_error.py): Membangun pohon hierarki error perbankan dan seleksi penanganan error.
 3. [`03_latihan_mandiri.py`](file:///c:/Users/anton/vibecoding/OOP/03_intermediate_level/modul_09_custom_exceptions/03_latihan_mandiri.py): Lembar kerja tantangan sistem penarikan saldo ATM & e-Wallet.
 4. [`04_solusi_latihan.py`](file:///c:/Users/anton/vibecoding/OOP/03_intermediate_level/modul_09_custom_exceptions/04_solusi_latihan.py): Kunci jawaban resmi lengkap dengan penanganan error berlapis.
+
