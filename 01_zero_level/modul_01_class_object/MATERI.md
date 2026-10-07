@@ -1,6 +1,6 @@
 # 🏗️ MODUL 1: MELAHIRKAN OBJEK PERTAMA
 > **Tingkat**: Zero Level (Fondasi Sintaks)  
-> **Tujuan**: Memahami cara menulis `class`, melahirkan objek (*instansiasi*), membongkar misteri fungsi `__init__` (Constructor), dan memahami siapa sebenarnya `self`.
+> **Tujuan**: Memahami cara menulis `class`, melahirkan objek (*instansiasi*), membongkar misteri fungsi `__init__` (Constructor), rahasia `self`, default parameter, serta pembuktian isolasi memori objek.
 
 ---
 
@@ -34,11 +34,12 @@ Mari kita buat cetakan untuk seekor **Kucing**:
 
 ```python
 class Kucing:
-    # 1. Constructor: Momen kelahiran kucing
-    def __init__(self, nama: str, warna: str, umur: int):
+    # 1. Constructor: Momen kelahiran kucing (lengkap dengan Default Parameter)
+    def __init__(self, nama: str, warna: str = "Putih", umur: int = 1):
         self.nama = nama
-        self.warna = warna
-        self.umur = umur
+        self.warna = warna    # Jika tidak diisi, otomatis "Putih"
+        self.umur = umur      # Jika tidak diisi, otomatis 1 tahun
+        self.energi = 50      # Nilai awal otomatis tanpa perlu diinput user
 
     # 2. Method: Kemampuan yang dimiliki kucing
     def bersuara(self):
@@ -52,23 +53,42 @@ class Kucing:
 Cukup panggil nama kelasnya seperti memanggil fungsi:
 
 ```python
-# Melahirkan objek kucing pertama
+# 1. Melahirkan objek lengkap dengan semua data:
 kucing1 = Kucing("Mimi", "Oranye", 2)
 
-# Melahirkan objek kucing kedua
-kucing2 = Kucing("Blacky", "Hitam", 3)
+# 2. Melahirkan objek yang memanfaatkan nilai bawaan (Default Parameter):
+kucing2 = Kucing("Snowy")  # warna otomatis "Putih", umur otomatis 1 tahun!
 
-# Memanggil kemampuan (Method) masing-masing kucing:
+# 3. Memanggil kemampuan (Method) masing-masing kucing:
 kucing1.bersuara()     # Output: Mimi bersuara: Meooong~!
-kucing2.bersuara()     # Output: Blacky bersuara: Meooong~!
+kucing2.bersuara()     # Output: Snowy bersuara: Meooong~!
 
 kucing1.perkenalan()   # Output: Halo, namaku Mimi, buluku Oranye, usiaku 2 tahun.
-kucing2.perkenalan()   # Output: Halo, namaku Blacky, buluku Hitam, usiaku 3 tahun.
+kucing2.perkenalan()   # Output: Halo, namaku Snowy, buluku Putih, usiaku 1 tahun.
 ```
 
 ---
 
-## 3. Membongkar Misteri `__init__` (Constructor)
+## 3. Mengakses & Mengubah Data Objek (Notasi Titik `.`)
+
+Bagaimana cara kita membaca atau mengubah data yang ada di dalam tubuh objek?  
+Cukup gunakan tanda titik (`.`):
+
+```python
+# MEMBACA ATRIBUT LANGSUNG:
+print(kucing1.nama)   # Output: Mimi
+print(kucing1.warna)  # Output: Oranye
+
+# MENGUBAH ATRIBUT LANGSUNG:
+kucing1.nama = "Mimi Cantik"
+print(kucing1.nama)   # Output: Mimi Cantik
+```
+
+> ⚠️ **Catatan Penting**: Mengubah atribut secara langsung seperti `kucing1.nama = ...` memang sangat mudah, tetapi jika tidak hati-hati, orang bisa mengubah saldo bank menjadi minus! Itulah sebabnya nanti di **Modul 3 (Encapsulation)** kita akan belajar cara memasang "gembok pengaman" untuk melindungi data ini.
+
+---
+
+## 4. Membongkar Misteri `__init__` (Constructor)
 
 Apa itu `__init__` dan mengapa ada garis bawah ganda (*double underscore* alias **dunder**)?
 
@@ -81,7 +101,7 @@ Apa itu `__init__` dan mengapa ada garis bawah ganda (*double underscore* alias 
 
 ---
 
-## 4. Memecahkan Teka-Teki Paling Terkenal di Python: Siapa Itu `self`?
+## 5. Memecahkan Teka-Teki Paling Terkenal di Python: Siapa Itu `self`?
 
 Bagi orang awam yang baru belajar Python, kata `self` sering terasa aneh dan membingungkan:  
 *"Kenapa `self` harus selalu ditulis di baris pertama setiap fungsi di dalam class?"*
@@ -116,27 +136,45 @@ Karena Python **selalu menyisipkan objek itu sendiri sebagai argumen pertama**, 
 
 ---
 
-## 5. Visualisasi Alur Instansiasi Objek (Mermaid)
+## 6. Pembuktian Nyata Isolasi Memori Objek dengan Fungsi `id()`
+
+Apakah `kucing1` dan `kucing2` benar-benar terpisah di dalam RAM komputer?  
+Mari kita buktikan dengan fungsi bawaan Python `id()` (melihat alamat fisik di memori komputer):
+
+```python
+kucing_a = Kucing("Mimi")
+kucing_b = Kucing("Mimi")  # Namanya sama persis, tapi apakah objeknya sama?
+
+print(id(kucing_a))  # Contoh output: 2195847384144
+print(id(kucing_b))  # Contoh output: 2195847385200 (ALAMAT MEMORI BERBEDA!)
+
+print(kucing_a is kucing_b)  # Output: False (Dua makhluk yang berbeda!)
+```
+Meskipun dua anak kucing memiliki nama dan ciri yang sama persis, mereka adalah **dua entitas fisik berbeda di dalam memori komputer**.
+
+---
+
+## 7. Visualisasi Alur Instansiasi Objek (Mermaid)
 
 ```mermaid
 sequenceDiagram
     autonumber
     actor User as Programmer
-    participant Memory as Memori Komputer
+    participant Memory as Memori Komputer (RAM)
     participant Class as Class Kucing
     participant Instance as Objek Baru (self)
 
     User->>Class: Kucing("Mimi", "Oranye", 2)
-    Class->>Memory: Alokasikan wadah baru di memori
-    Memory-->>Instance: Terbentuk wadah kosong
+    Class->>Memory: Minta alamat RAM baru
+    Memory-->>Instance: Terbentuk wadah fisik (misal: ID 0x1A2B)
     Class->>Instance: Panggil __init__(self, "Mimi", "Oranye", 2)
     Instance->>Instance: self.nama = "Mimi"<br/>self.warna = "Oranye"<br/>self.umur = 2
-    Instance-->>User: Berikan objek yang sudah siap dipakai (kucing1)
+    Instance-->>User: Objek siap dikendalikan lewat variabel kucing1
 ```
 
 ---
 
-## 6. ⚠️ Awas 3 Jebakan Klasik Pemula!
+## 8. ⚠️ Awas 3 Jebakan Klasik Pemula!
 
 Hampir 90% pemula mengalami setidaknya satu dari tiga error berikut:
 
@@ -163,7 +201,7 @@ Hampir 90% pemula mengalami setidaknya satu dari tiga error berikut:
 
 ---
 
-## 7. 🎯 Kuis Kilat Cek Pemahaman Mandiri
+## 9. 🎯 Kuis Kilat Cek Pemahaman Mandiri
 
 #### Soal 1:
 > Perhatikan baris kode ini:
@@ -202,9 +240,9 @@ Hampir 90% pemula mengalami setidaknya satu dari tiga error berikut:
 
 ---
 
-## 8. 🛠️ Berkas Latihan di Modul Ini
+## 10. 🛠️ Berkas Latihan di Modul Ini
 Silakan buka dan jalankan file berikut untuk bereksperimen langsung:
-1. `01_dasar_class_object.py` $\rightarrow$ Praktik membuat class, atribut, dan method pertama.
+1. `01_dasar_class_object.py` $\rightarrow$ Praktik membuat class, default parameter, mutasi atribut langsung, dan cek alamat memori `id()`.
 2. `02_jebakan_pemula.py` $\rightarrow$ Melihat langsung 3 error pemula dan cara memperbaikinya.
-3. `03_latihan_mandiri.py` $\rightarrow$ Latihan membuat class `Kucing` dan menu `Kopi`.
+3. `03_latihan_mandiri.py` $\rightarrow$ Latihan membuat class pesanan kopi `PesananKopi`.
 4. `03_solusi_latihan.py` $\rightarrow$ Kunci jawaban lengkap latihan.

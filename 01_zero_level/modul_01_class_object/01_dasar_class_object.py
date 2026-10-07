@@ -4,10 +4,10 @@
 Modul 1: Melahirkan Objek Pertama (Class, Object, Constructor, & self)
 
 File ini mendemonstrasikan cara:
-1. Mendefinisikan class
-2. Menyiapkan atribut di dalam __init__
+1. Mendefinisikan class & constructor dengan DEFAULT PARAMETERS
+2. Membaca & mengubah atribut langsung (dot notation '.')
 3. Membuat method (perilaku objek)
-4. Melahirkan beberapa objek nyata di memori
+4. Melahirkan beberapa objek nyata di memori & membuktikan isolasi memori dengan id()
 """
 import sys
 
@@ -22,12 +22,12 @@ print("=" * 60)
 print("[DEMO] DASAR MEMBUAT CLASS & MELAHIRKAN OBJEK")
 print("=" * 60)
 
-# 1. CETAKAN (CLASS)
+# 1. CETAKAN (CLASS) DENGAN DEFAULT PARAMETER
 class Kucing:
     """Cetak biru untuk menciptakan objek kucing."""
     
-    def __init__(self, nama: str, warna_bulu: str, umur: int):
-        # Data yang menempel pada tubuh masing-masing kucing (Instance Attributes)
+    # Nilai default: jika warna tidak diisi -> "Putih", umur tidak diisi -> 1
+    def __init__(self, nama: str, warna_bulu: str = "Putih", umur: int = 1):
         self.nama = nama
         self.warna_bulu = warna_bulu
         self.umur = umur
@@ -57,10 +57,13 @@ class Kucing:
             print(f"[LEMAS] {self.nama} terlalu lelah untuk berlari. Butuh makan dulu!")
 
 
-# 2. MELAHIRKAN DUA OBJEK BERBEDA DARI SATU CETAKAN
+# 2. MELAHIRKAN DUA OBJEK BERBEDA
 print("\n--- 1. Melahirkan Dua Kucing Berbeda ---")
+# Kucing 1: Semua data diisi lengkap
 kucing_a = Kucing("Mimi", "Oranye", 2)
-kucing_b = Kucing("Blacky", "Hitam Legam", 3)
+
+# Kucing 2: Memanfaatkan Default Parameter (hanya isi nama, warna & umur otomatis)
+kucing_b = Kucing("Snowy")
 
 # 3. MEMANGGIL METHOD MASING-MASING OBJEK
 print("\n--- 2. Memanggil Perkenalan ---")
@@ -68,13 +71,22 @@ kucing_a.perkenalan()
 print()
 kucing_b.perkenalan()
 
-print("\n--- 3. Aksi Kucing A (Mimi) ---")
-kucing_a.bersuara()
+# 4. MEMBACA & MENGUBAH ATRIBUT LANGSUNG DENGAN TITIK (.)
+print("\n--- 3. Mengubah Atribut Langsung ---")
+print(f"Nama lama kucing_a: {kucing_a.nama}")
+kucing_a.nama = "Mimi Si Manis"
+print(f"Nama baru kucing_a: {kucing_a.nama}")
+
+# 5. PEMBUKTIAN ALAMAT MEMORI DENGAN id()
+print("\n--- 4. Pembuktian Isolasi Memori di RAM Komputer ---")
+print(f"Alamat fisik memori kucing_a : {id(kucing_a)}")
+print(f"Alamat fisik memori kucing_b : {id(kucing_b)}")
+print(f"Apakah kucing_a dan kucing_b adalah objek yang sama di RAM? -> {kucing_a is kucing_b}")
+
+print("\n--- 5. Interaksi Mandiri Objek ---")
 kucing_a.makan("Ikan Tongkol")
 kucing_a.lari()
-
-print("\n--- 4. Cek Kucing B (Blacky) ---")
-print(f"Perhatikan: Energi Blacky tetap {kucing_b.energi}/100 (TIDAK terpengaruh oleh aksi Mimi!)")
+print(f"Energi kucing_b tetap {kucing_b.energi}/100 (Tidak ikut berkurang!).")
 
 print("\n" + "=" * 60)
 print("[OK] Selesai: Objek-objek hidup mandiri di memori komputer.")
