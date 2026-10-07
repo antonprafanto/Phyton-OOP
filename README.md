@@ -30,7 +30,7 @@ Untuk melihat silabus super lengkap dan memantau status belajar secara detail, s
 | **Fase 2** | [**Modul 3**](02_core_level/modul_03_encapsulation/MATERI.md) | Pilar 1: Encapsulation | Proteksi Data, Public/Private, dan Gaya Elegan `@property` |
 | *(Core)* | [**Modul 4**](02_core_level/modul_04_inheritance/MATERI.md) | Pilar 2: Inheritance | Pewarisan Sifat, DRY, `super()`, & Multiple Inheritance |
 | | [**Modul 5**](02_core_level/modul_05_polymorphism/MATERI.md) | Pilar 3: Polymorphism | Overriding Method, Portabilitas Aksi, dan Filosofi *Duck Typing* |
-| | **Modul 6** | Pilar 4: Abstraction | Menyembunyikan Kerumitan dengan `abc.ABC` & `@abstractmethod` |
+| | [**Modul 6**](02_core_level/modul_06_abstraction/MATERI.md) | Pilar 4: Abstraction | Menyembunyikan Kerumitan dengan `abc.ABC` & `@abstractmethod` |
 | **Fase 3** | **Modul 7** | Python Superpowers (Dunder) | Magic Methods (`__str__`, `__repr__`, `__len__`, `__eq__`) & JSON Serialization |
 | *(Intermediate)*| **Modul 8** | Metode Spesial | `@classmethod` (Alternative Constructor) vs `@staticmethod` |
 | | **Modul 9** | Custom Exception | Membuat Error Sendiri yang Mewarisi `Exception` |
