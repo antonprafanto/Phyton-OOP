@@ -173,10 +173,31 @@ avanza.jalan()
 
 ---
 
-## ⚠️ 5. Awas Jebakan Pemula! (Common Pitfalls)
+---
+
+## 🌳 5. Panduan Keputusan: Kapan Pakai Relasi Apa?
+
+Gunakan diagram alir ini untuk memutuskan relasi yang tepat dalam desain class Anda:
+
+```mermaid
+flowchart TD
+    Mulai([Hubungan Antar Dua Class: A dan B]) --> Q1{Apakah B adalah bentuk spesifik<br/>dari A secara hakiki?<br/>Tes IS-A: Kucing adalah Hewan}
+    Q1 -->|YA| Inh[Gunakan INHERITANCE / Pewarisan\nclass B A: ...]
+    Q1 -->|TIDAK| Q2{Apakah A 'memiliki' B?<br/>Tes HAS-A / PART-OF}
+    Q2 -->|TIDAK - Hanya Pakai Sesaat| Ass[Gunakan ASOSIASI\ndef aksi self, b: ...]
+    Q2 -->|YA - Memiliki| Q3{Jika A dihapus/hancur,<br/>apakah B harus ikut mati?}
+    Q3 -->|YA - Keterikatan Mati Hidup| Comp[Gunakan KOMPOSISI\nself.b = B... di dalam A]
+    Q3 -->|TIDAK - B Tetap Hidup Mandiri| Agg[Gunakan AGREGASI\nTerima b dari luar dan simpan di list]
+```
+
+---
+
+## ⚠️ 6. Awas Jebakan Pemula! (Common Pitfalls)
+
+Berikut adalah kesalahan arsitektur yang paling sering ditemui dalam mendesain hubungan objek:
 
 ### ❌ Jebakan 1: Pewarisan Konyol (*Absurd Inheritance*)
-Banyak pemula menulis:
+Banyak pemula tergoda menggunakan inheritance hanya untuk "menghemat beberapa baris kode":
 ```python
 # SALAH BESAR:
 class Mobil(Mesin):  # Apakah Mobil "adalah" Mesin? BUKAN!
@@ -186,12 +207,42 @@ Terapkan tes kalimat sederhana:
 * *"Apakah Mobil adalah Mesin?"* $\rightarrow$ **SALAH** (Mobil *memiliki* mesin $\rightarrow$ gunakan **Komposisi**).
 * *"Apakah Kucing adalah Hewan?"* $\rightarrow$ **BENAR** (Kucing *adalah* hewan $\rightarrow$ gunakan **Inheritance**).
 
-### ❌ Jebakan 2: Hardcoding Objek di Dalam Class Tanpa Fleksibilitas
-Dalam arsitektur software modern, jika Anda ingin komponen mudah diuji (*unit testing*), gunakan teknik **Dependency Injection**: terima objek pendukung lewat constructor daripada memaksa membuatnya di dalam secara kaku.
+### ❌ Jebakan 2: Pelanggaran Hukum Demeter (*Law of Demeter / Train Wreck Code*)
+Ketika Anda menggunakan komposisi, hindari memanggil atribut objek anak terlalu dalam:
+```python
+# ❌ KODE GERBONG KERETA API (TRAIN WRECK):
+komputer.processor.cache.l3.bersihkan_memori()  # Sangat rapuh!
+
+# ✅ LEBIH BAIK (Bicaralah hanya pada teman terdekat):
+komputer.optimasi_performa()  # Biarkan komputer yang menyuruh processor-nya sendiri
+```
+
+### ❌ Jebakan 3: Hardcoding Objek di Dalam Class Tanpa Fleksibilitas
+Dalam arsitektur software profesional, daripada memaksa menciptakan objek di dalam constructor secara kaku, gunakan teknik **Dependency Injection**:
+```python
+# Kurang fleksibel (sulit di-test):
+class Pembayaran:
+    def __init__(self):
+        self.gateway = MidtransGateway() # Kaku terikat ke Midtrans
+
+# Sangat fleksibel (mudah diganti untuk testing):
+class Pembayaran:
+    def __init__(self, gateway):
+        self.gateway = gateway           # Bisa diisi Midtrans, Xendit, atau MockGateway
+```
+
+### ❌ Jebakan 4: Kebocoran Memori Akibat *Circular Reference*
+Jika Objek A menyimpan referensi ke Objek B, dan Objek B juga menyimpan referensi ke Objek A, Python garbage collector membutuhkan usaha ekstra untuk membersihkannya:
+```python
+# Awas siklus melingkar:
+suami.istri = rani
+rani.suami = budi
+# Pastikan jalur ketergantungan mengalir satu arah jika memungkinkan!
+```
 
 ---
 
-## 🧠 6. Kuis Uji Pemahaman
+## 🧠 7. Kuis Uji Pemahaman
 
 1. **Apa perbedaan mendasar antara Agregasi dan Komposisi dalam hal siklus hidup objek (*lifecycle*)?**
 <details>
@@ -211,6 +262,12 @@ Pada <strong>Agregasi</strong>, objek anak tetap hidup mandiri jika objek induk 
 Karena inheritance bersifat kaku dan statis saat kompilasi. Dengan komposisi, perilaku objek dapat dirakit layaknya balok Lego dan diganti-ganti saat runtime tanpa perlu membuat puluhan class kombinatorial baru.
 </details>
 
+4. **Apa yang dimaksud dengan pelanggaran <i>Law of Demeter (Train Wreck)</i> dalam arsitektur objek?**
+<details>
+<summary>👁️ Lihat Jawaban</summary>
+Memanggil method atau atribut objek yang terlalu jauh ke dalam rantai kepemilikan (misal: <code>a.b.c.d.aksi()</code>). Hal ini melanggar enkapsulasi karena objek <code>a</code> harus mengetahui struktur internal milik <code>b</code>, <code>c</code>, dan <code>d</code> sekaligus.
+</details>
+
 ---
 
 ## 📂 Berkas Praktik pada Modul Ini
@@ -219,3 +276,4 @@ Silakan pelajari dan jalankan berkas-berkas berikut secara bertahap:
 2. [`02_composition_over_inheritance.py`](file:///c:/Users/anton/vibecoding/OOP/04_hero_level/modul_11_object_relationships/02_composition_over_inheritance.py): Studi kasus RPG Game: menghentikan *Class Explosion* dengan sistem rakitan senjata & elemen.
 3. [`03_latihan_mandiri.py`](file:///c:/Users/anton/vibecoding/OOP/04_hero_level/modul_11_object_relationships/03_latihan_mandiri.py): Lembar kerja perakitan PC Komputer (`Processor`, `RAM`, `Motherboard`) dan Pengguna.
 4. [`04_solusi_latihan.py`](file:///c:/Users/anton/vibecoding/OOP/04_hero_level/modul_11_object_relationships/04_solusi_latihan.py): Kunci jawaban resmi lengkap dengan diagnosis spesifikasi PC.
+
