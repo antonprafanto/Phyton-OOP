@@ -34,7 +34,7 @@ Untuk melihat silabus super lengkap dan memantau status belajar secara detail, s
 | **Fase 3** | [**Modul 7**](03_intermediate_level/modul_07_dunder_methods/MATERI.md) | Python Superpowers (Dunder) | Magic Methods (`__str__`, `__repr__`, `__len__`, `__eq__`) & JSON Serialization |
 | *(Intermediate)*| [**Modul 8**](03_intermediate_level/modul_08_special_methods/MATERI.md) | Metode Spesial | `@classmethod` (Alternative Constructor) vs `@staticmethod` |
 | | [**Modul 9**](03_intermediate_level/modul_09_custom_exceptions/MATERI.md) | Custom Exception | Membuat Error Sendiri yang Mewarisi `Exception` |
-| | **Modul 10** | Modern Python Shortcut | Modul `@dataclass` & Penulisan Type Hinting Modern |
+| | [**Modul 10**](03_intermediate_level/modul_10_dataclasses/MATERI.md) | Modern Python Shortcut | Modul `@dataclass` & Penulisan Type Hinting Modern |
 | **Fase 4** | **Modul 11** | Hubungan Antar Objek | Association, Aggregation, & Komposisi (*Composition over Inheritance*) |
 | *(Hero)* | **Modul 12** | Prinsip S.O.L.I.D | Clean Architecture (S-O-L-I-D) Dijelaskan Ramah Awam |
 | | **Modul 13** | Design Patterns Populer | Singleton, Factory Method, dan Strategy Pattern di Python |
