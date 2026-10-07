@@ -76,8 +76,8 @@ OOP/
 
 1. **Clone Repositori**:
    ```bash
-   git clone https://github.com/antonprafanto/Phyton-OOP.git
-   cd Phyton-OOP
+   git clone https://github.com/antonprafanto/Python-OOP.git
+   cd Python-OOP
    ```
 2. **Pastikan Python 3 Terinstall**:
    ```bash
