@@ -223,18 +223,72 @@ nav.cari_jalan("Jakarta", "Bandung")
 
 ---
 
-## ⚠️ 4. Awas Jebakan Pemula! (Common Pitfalls)
+## 💡 Wawasan Pro: Cara Paling Pythonic Membuat Singleton
+Tahukah Anda? Di komunitas Python, ada pepatah terkenal:
+> *"A module is already a natural Singleton in Python!"*
+
+Saat Anda membuat file `konfigurasi.py`:
+```python
+# konfigurasi.py
+DATABASE_URL = "postgres://user:pass@localhost:5432/db"
+APP_NAME = "SuperApp"
+```
+Lalu mengimpornya di 10 file berbeda:
+```python
+import konfigurasi  # Python hanya mengeksekusi file ini 1 kali dan mencache-nya di sys.modules!
+```
+Semua file yang mengimpor `konfigurasi` akan mendapatkan referensi ke modul yang sama di RAM. Ini adalah cara paling sederhana (*idiomatic Python*) jika Anda hanya butuh konfigurasi global tanpa butuh perilaku OOP lanjutan.
+
+---
+
+## 🏭 Tambahan: Membedakan Trio Pabrik (Simple Factory vs Factory Method vs Abstract Factory)
+
+Pemula sering bingung saat mendengar kata "Pabrik". Berikut panduan mudahnya:
+
+| Jenis Pabrik | Analogi Dunia Nyata | Karakteristik Kode |
+| :--- | :--- | :--- |
+| **Simple Factory** | Kasir Toko Donat (1 tempat melayani pesanan donat cokelat, keju, tiramisu). | Satu class/fungsi statis yang memiliki kamus/percabangan untuk menciptakan berbagai objek sejenis. |
+| **Factory Method (GoF)** | Waralaba Restoran Cepat Saji (Pusat membuat cetakan dapur `Restoran(ABC)`, tiap cabang `RestoranKFC` atau `RestoranMcD` membuat menunya sendiri). | Membiarkan subclass menentukan class mana yang akan diinstansiasi melalui metode turunan. |
+| **Abstract Factory (GoF)** | Pabrik Tema Sistem Operasi (Satu pabrik menghasilkan seluruh keluarga tombol, teks, dan jendela yang cocok untuk Windows ATAU Mac). | Pabrik yang melahirkan **keluarga objek yang saling terkait** tanpa menyebut class konkretnya. |
+
+---
+
+## ⚠️ 4. Awas Jebakan Pemula! (5 Common Pitfalls)
 
 ### ❌ Jebakan 1: Sindrom *Patternitis* (Kecanduan Design Pattern)
 Banyak developer pemula yang baru belajar design pattern merasa gatal ingin memasukkan Singleton, Factory, dan Strategy ke dalam setiap 10 baris kode yang mereka tulis.  
 *Ingat:* Design pattern menambah lapisan abstraksi. **Gunakan pola desain HANYA ketika masalah nyata tersebut memang muncul**, bukan untuk pamer kemahiran sintaks!
 
 ### ❌ Jebakan 2: Singleton Sebagai Global Variable Terselubung
-Jika Anda menaruh terlalu banyak variabel yang bisa diubah-ubah di dalam Singleton, Singleton tersebut berubah menjadi *Global Variable*. Kode akan menjadi sangat sulit untuk diuji (*unit testing*) karena satu test dapat mengubah data dan merusak test lainnya.
+Jika Anda menaruh terlalu banyak variabel yang bisa diubah-ubah di dalam Singleton, Singleton tersebut berubah menjadi *Global Variable*. Kode akan menjadi sangat sulit untuk diuji (*unit testing*) karena satu unit test dapat mengubah data dan merusak test lainnya secara tidak terduga.
 
 ### ❌ Jebakan 3: Kebingungan Antara Strategy Pattern vs State Pattern
 * **Strategy Pattern:** Algoritma dipilih atau disuntikkan dari luar oleh *client* (misal: user memilih metode pembayaran QRIS vs Kartu).
 * **State Pattern:** Objek mengubah perilakunya sendiri secara otomatis dari dalam berdasarkan transisi statusnya (misal: tombol pemutar musik yang berubah fungsi saat status berganti dari *Playing* ke *Paused*).
+
+### ❌ Jebakan 4: Bahaya `__init__()` Terpanggil Dua Kali pada Singleton Python!
+Di Python, jika `__new__()` mengembalikan instance dari class yang sama, Python akan **selalu memanggil `__init__()`** setelahnya!  
+Jika Anda menginisialisasi atribut di dalam `__init__()` tanpa flag penjaga:
+```python
+def __init__(self):
+    self.counter = 0  # BAHAYA: Akan ter-reset ke 0 setiap kali Singleton dipanggil di tempat lain!
+```
+*Solusi:* Selalu gunakan guard flag seperti `if not hasattr(self, '_terinisialisasi'):` atau `if not cls._terinisialisasi:`.
+
+### ❌ Jebakan 5: Kebingungan "Bukankah Strategy Cuma Polymorphism Biasa?"
+*Benar!* Strategy Pattern dibangun di atas pilar Polymorphism. Namun, bedanya:
+* **Polymorphism** adalah fitur sintaks bahasa pemrograman (kemampuan method memiliki nama sama dengan aksi berbeda).
+* **Strategy Pattern** adalah *resep arsitektur*: Memisahkan algoritma perhitungan ke dalam objek mandiri yang disematkan (*HAS-A*) ke dalam objek Context, sehingga algoritma bisa diganti saat aplikasi sedang aktif berjalan (*runtime swapping*).
+
+---
+
+## 📊 Ringkasan Komparasi 3 Pola Desain
+
+| Pola Desain | Tipe (GoF) | Masalah yang Dipecahkan | Kapan Menggunakannya? | Awas / Kapan Dihindari? |
+| :--- | :---: | :--- | :--- | :--- |
+| **Singleton** | Creational | Butuh 1 objek fisik tunggal yang dibagi ke seluruh program. | Koneksi Database, Logger, Konfigurasi Global. | Jangan gunakan jika data butuh dibuat independen untuk Unit Testing. |
+| **Factory Method** | Creational | Client tidak boleh terikat (*loosely coupled*) ke class konkret. | Pembuatan berbagai format dokumen (PDF, CSV) atau saluran notifikasi. | Hindari jika tipe objek cuma 1 atau 2 dan tidak akan pernah bertambah. |
+| **Strategy** | Behavioral | Ingin mengganti algoritma tanpa mengubah class pengguna algoritma. | Kalkulator Diskon, Hitung Ongkir, Algoritma Kompresi Data (ZIP, RAR). | Hindari jika algoritma hanya satu jenis dan perhitungannya sangat sederhana. |
 
 ---
 
@@ -258,6 +312,18 @@ Kode client menjadi tidak terikat (*loosely coupled*) pada nama class konkret da
 Karena Strategy Pattern mematuhi <strong>Open/Closed Principle (OCP)</strong>. Algoritma diisolasi ke dalam class mandiri, sehingga menambah strategi baru tidak perlu mengubah method utama dan strategi tersebut dapat diganti dengan mudah saat aplikasi sedang berjalan (runtime).
 </details>
 
+4. **Mengapa module Python (misal: file `config.py` yang diimpor dengan `import config`) sering disebut sebagai Singleton paling alami di Python?**
+<details>
+<summary>👁️ Lihat Jawaban</summary>
+Karena mekanisme internal Python secara otomatis mencatat dan mencache setiap modul yang diimpor ke dalam <code>sys.modules</code>. Ketika file lain mengimpor modul yang sama, Python tidak akan membuat ulang file tersebut di RAM, melainkan mengembalikan referensi objek modul yang sama persis.
+</details>
+
+5. **Apa masalah fatal yang terjadi pada Singleton di Python jika kita tidak menambahkan guard flag (penjaga) di dalam `__init__()`?**
+<details>
+<summary>👁️ Lihat Jawaban</summary>
+Python akan mengeksekusi <code>__init__()</code> setiap kali kita memanggil nama class. Tanpa flag penjaga, variabel-variabel di dalam objek tunggal tersebut akan terus di-reset ulang ke nilai default setiap kali ada modul baru yang memanggil class Singleton tersebut.
+</details>
+
 ---
 
 ## 📂 Berkas Praktik pada Modul Ini
@@ -266,3 +332,4 @@ Silakan pelajari dan jalankan berkas-berkas berikut secara bertahap:
 2. [`02_factory_dan_strategy.py`](file:///c:/Users/anton/vibecoding/OOP/04_hero_level/modul_13_design_patterns/02_factory_dan_strategy.py): Praktik Factory Method (Eksportir Dokumen) dan Strategy Pattern (Kalkulator Rute & Ongkir).
 3. [`03_latihan_mandiri.py`](file:///c:/Users/anton/vibecoding/OOP/04_hero_level/modul_13_design_patterns/03_latihan_mandiri.py): Lembar kerja tantangan sistem Payment Gateway & Ekspor Laporan Keuangan.
 4. [`04_solusi_latihan.py`](file:///c:/Users/anton/vibecoding/OOP/04_hero_level/modul_13_design_patterns/04_solusi_latihan.py): Kunci jawaban resmi arsitektur enterprise lengkap.
+
