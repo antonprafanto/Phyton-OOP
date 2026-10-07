@@ -4,12 +4,12 @@
 Modul 5: Pilar 3 – Polymorphism & Filosofi Duck Typing
 
 File ini mendemonstrasikan:
-1. Filosofi Duck Typing khas Python:
-   "Jika dia berjalan seperti bebek dan bersuara seperti bebek, maka dia adalah bebek!"
-2. Polymorphism TANPA ikatan Inheritance sama sekali
-3. Pemeriksaan fleksibel dengan hasattr() vs EAFP (try-except)
+1. Filosofi Duck Typing khas Python
+2. Dua cara eksekusi: LBYL (hasattr) vs EAFP (try-except)
+3. Python Modern: typing.Protocol (Duck Typing dengan Type Hinting)
 """
 import sys
+from typing import Protocol
 
 if sys.stdout.encoding.lower() != 'utf-8':
     try:
@@ -18,25 +18,18 @@ if sys.stdout.encoding.lower() != 'utf-8':
         pass
 
 print("=" * 60)
-print("[DEMO] DUCK TYPING (POLYMORPHISM TANPA INHERITANCE)")
+print("[DEMO] DUCK TYPING, EAFP, & MODERN PROTOCOL")
 print("=" * 60)
 
 # ==============================================================
-# EMPAT KELAS YANG SAMA SEKALI TIDAK PUNYA HUBUNGAN KELUARGA / INDUK
+# 1. EMPAT KELAS TANPA HUBUNGAN INHERITANCE SAMA SEKALI
 # ==============================================================
 class FileAudioMp3:
     def __init__(self, judul: str):
         self.judul = judul
 
     def putar(self):
-        print(f"[AUDIO] Memainkan lagu '{self.judul}.mp3' melalui speaker stereo...")
-
-class FileVideoMp4:
-    def __init__(self, judul: str):
-        self.judul = judul
-
-    def putar(self):
-        print(f"[VIDEO] Menampilkan video HD '{self.judul}.mp4' di layar monitor...")
+        print(f"[AUDIO] Memainkan lagu '{self.judul}.mp3' melalui speaker...")
 
 class StreamingYoutube:
     def __init__(self, url: str):
@@ -50,36 +43,59 @@ class DokumenPdf:
     def __init__(self, nama_file: str):
         self.nama_file = nama_file
 
-    def baca_halaman(self):
-        print(f"[PDF] Membaca halaman dokumen {self.nama_file}...")
-
 
 # ==============================================================
-# APLIKASI PEMUTAR MEDIA (MEDIA PLAYER ENGINE)
+# 2. GAYA EKSEKUSI 1: LBYL (Look Before You Leap)
 # ==============================================================
-def putar_media(sumber_media):
-    """
-    Fungsi ini tidak peduli 'sumber_media' turunan siapa!
-    Asalkan dia punya method putar(), jalankan! (Duck Typing)
-    """
-    if hasattr(sumber_media, "putar") and callable(sumber_media.putar):
-        sumber_media.putar()
+def putar_gaya_lbyl(media):
+    print("\n--- Eksekusi Gaya LBYL (hasattr) ---")
+    if hasattr(media, "putar") and callable(media.putar):
+        media.putar()
     else:
-        print(f"[TOLAK] Objek bertipe '{type(sumber_media).__name__}' tidak bisa diputar!")
+        print(f"[LBYL DITOLAK] Objek '{type(media).__name__}' tidak punya method putar()!")
+
+
+# ==============================================================
+# 3. GAYA EKSEKUSI 2: EAFP (Gaya Favorit Komunitas Python)
+# ==============================================================
+def putar_gaya_eafp(media):
+    print("\n--- Eksekusi Gaya EAFP (try-except) ---")
+    try:
+        media.putar()
+    except AttributeError:
+        print(f"[EAFP DITANGKAP] Objek '{type(media).__name__}' gagal diputar karena tidak punya method putar()!")
+
+
+# ==============================================================
+# 4. PYTHON MODERN: typing.Protocol
+# ==============================================================
+class BisaDiputar(Protocol):
+    """Kontrak bentuk: Objek apa pun yang punya method putar() dianggap kompatibel."""
+    def putar(self) -> None:
+        ...
+
+def putar_player_modern(media: BisaDiputar):
+    media.putar()
 
 
 # --- PENGUJIAN ---
-daftar_antrian = [
-    FileAudioMp3("Bohemian Rhapsody"),
-    FileVideoMp4("Tutorial_Python_OOP"),
-    StreamingYoutube("https://youtube.com/watch?v=12345"),
-    DokumenPdf("Ebook_Panduan.pdf")  # Ini bukan media yang bisa diputar
-]
+lagu = FileAudioMp3("Bohemian Rhapsody")
+video = StreamingYoutube("https://youtu.be/demo123")
+buku = DokumenPdf("Buku_OOP.pdf")
 
-print("\n--- Memulai Pemutaran Beragam Media ---")
-for item in daftar_antrian:
-    putar_media(item)
+# Uji LBYL
+putar_gaya_lbyl(lagu)
+putar_gaya_lbyl(buku)
+
+# Uji EAFP
+putar_gaya_eafp(video)
+putar_gaya_eafp(buku)
+
+# Uji Modern Protocol
+print("\n--- Eksekusi Player Modern (typing.Protocol) ---")
+putar_player_modern(lagu)
+putar_player_modern(video)
 
 print("\n" + "=" * 60)
-print("[OK] Selesai: Duck Typing berhasil memproses objek beragam bentuk secara dinamis.")
+print("[OK] Selesai: Duck Typing, EAFP, dan typing.Protocol terkuasai.")
 print("=" * 60)

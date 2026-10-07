@@ -1,6 +1,6 @@
 # 🎭 MODUL 5: PILAR 3 – POLYMORPHISM & FILOSOFI DUCK TYPING
 > **Tingkat**: Core Level (4 Pilar Utama OOP)  
-> **Tujuan**: Memahami konsep **Polymorphism** (satu perintah, beragam tindakan), membedah perbedaan *Overriding* vs *Overloading*, menguasai filosofi legendaris Python **Duck Typing**, serta membangun sistem fleksibel yang siap menerima objek apa pun tanpa merusak kode lama.
+> **Tujuan**: Memahami konsep **Polymorphism** (satu perintah, beragam tindakan), polimorfisme operator bawaan, filosofi legendaris **Duck Typing**, dua mazhab eksekusi (*LBYL vs EAFP*), serta fitur modern `typing.Protocol`.
 
 ---
 
@@ -27,9 +27,9 @@ Bayangkan Anda memiliki beberapa perangkat elektronik di rumah:
 
 Contoh lain dalam kehidupan sehari-hari:
 * Tombol **"Play" (▶️)** di layar:
-  * Jika Anda memutar lagu di Spotify $\rightarrow$ Keluar suara musik.
-  * Jika Anda memutar video di YouTube $\rightarrow$ Keluar gambar bergerak dan audio.
-  * Jika Anda memutar rekaman suara di WhatsApp $\rightarrow$ Terdengar suara pesan teman.
+  * Jika memutar lagu di Spotify $\rightarrow$ Keluar suara musik.
+  * Jika memutar video di YouTube $\rightarrow$ Keluar gambar bergerak dan audio.
+  * Jika memutar pesan suara di WhatsApp $\rightarrow$ Terdengar suara obrolan teman.
 * Perintahnya **SAMA PERSIS**: `play()`.
 * Tetapi aksinya **BERAGAM BENTUK** tergantung objek apa yang sedang merespons!
 
@@ -39,7 +39,25 @@ Contoh lain dalam kehidupan sehari-hari:
 
 ---
 
-## 2. Polymorphism Klasik Lewat Inheritance (Method Overriding)
+## 2. Kejutan: Anda Sebenarnya Sudah Menggunakan Polimorfisme Sejak Awal! 💡
+
+Sebelum masuk ke class rumit, sadarkah Anda bahwa simbol tambah (`+`) di Python adalah bentuk polimorfisme paling nyata?
+
+```python
+# 1. Pada Angka (Matematika):
+print(10 + 20)           # Output: 30
+
+# 2. Pada Teks (Penggabungan String):
+print("Kopi " + "Susu")   # Output: Kopi Susu
+
+# 3. Pada List (Penggabungan Koleksi):
+print([1, 2] + [3, 4])   # Output: [1, 2, 3, 4]
+```
+Satu simbol yang sama (`+`), tetapi perilakunya **berubah secara cerdas** tergantung jenis objek yang berada di sisi kiri dan kanannya!
+
+---
+
+## 3. Polymorphism Klasik Lewat Inheritance (Method Overriding)
 
 Bentuk polymorphism paling umum adalah ketika beberapa kelas anak menimpa (*override*) method yang diwariskan oleh kelas induk:
 
@@ -68,143 +86,116 @@ class Bebek(Hewan):
 Perhatikan betapa indahnya kita bisa memperlakukan semua objek secara seragam:
 
 ```python
-koleksi_hewan = [
-    Kucing("Mimi"),
-    Anjing("Blacky"),
-    Bebek("Donald")
-]
+koleksi_hewan = [Kucing("Mimi"), Anjing("Blacky"), Bebek("Donald")]
 
 # SATU PERINTAH UNTUK SEMUA OBJEK:
 for h in koleksi_hewan:
     h.bersuara()
-
-# Output:
-# [Mimi] Meooong~ purrr!
-# [Blacky] Guk guk guk!
-# [Donald] Kweeeek kweeeek!
 ```
 Kita tidak perlu menulis `if tipe == "kucing"` atau `if tipe == "anjing"`. Cukup panggil `h.bersuara()`, dan masing-masing hewan otomatis tahu cara mengekspresikan dirinya!
 
 ---
 
-## 3. Filosofi Khas Python: "Duck Typing" 🦆
+## 4. Filosofi Khas Python: "Duck Typing" 🦆
 
-Ini adalah salah satu fitur paling unik dan membanggakan dari bahasa Python yang membedakannya dari Java, C++, atau C#.
-
-Di bahasa kaku (seperti Java):  
-Untuk bisa diperlakukan secara polimorfik, objek **HARUS** merupakan turunan resmi dari kelas induk yang sama (punya hubungan darah/warisan).
-
-Di Python yang dinamis, ada peribahasa sakti:
+Di bahasa kaku (seperti Java): Objek **HARUS** merupakan turunan resmi dari kelas induk yang sama untuk bisa polimorfik.  
+Di Python yang dinamis, ada peribahasa legendaris:
 > *"If it walks like a duck and quacks like a duck, then it's a duck!"*  
 > (Jika dia berjalan seperti bebek dan bersuara seperti bebek, maka bagi kita dia adalah bebek!)
 
-### Apa Maksudnya di Kodingan?
-Objek **TIDAK PERLU** mewarisi class yang sama! Asalkan objek tersebut memiliki **nama method yang sama**, Python akan dengan senang hati mengeksekusinya:
+Objek **TIDAK PERLU** punya hubungan warisan/darah sama sekali! Asalkan objek tersebut memiliki **nama method yang diminta**, Python akan mengeksekusinya.
 
+### Dua Mazhab Eksekusi Duck Typing di Python:
+Bagaimana cara kita memanggil objek Duck Typing dengan aman?
+
+#### A. Gaya LBYL (*Look Before You Leap* - Cek Dulu Sebelum Lompat)
 ```python
-class ManusiaMeniruBebek:
-    """Manusia yang sama sekali BUKAN turunan Hewan/Bebek!"""
-    def bersuara(self):
-        print("[Orang Iseng]: Kweeeek! (Menirukan suara bebek dengan mulut)")
-
-# Python tidak peduli silsilah keturunannya!
-orang = ManusiaMeniruBebek()
-kucing = Kucing("Mimi")
-
-for objek in [kucing, orang]:
-    objek.bersuara()  # ✅ KEDUANYA BERHASIL DIEKSEKUSI DENGAN MULUS!
+if hasattr(objek, "bersuara") and callable(objek.bersuara):
+    objek.bersuara()
 ```
 
-**Kelebihan Duck Typing**:  
-Kode Anda menjadi luar biasa fleksibel. Di masa depan, siapa saja bisa menambahkan objek baru ke sistem Anda tanpa harus mengubah satu baris pun kode lama Anda!
+#### B. Gaya EAFP (*Easier to Ask for Forgiveness than Permission* - Gaya Favorit Python!)
+Komunitas Python lebih menyukai prinsip: *"Jalankan saja dulu, jika error baru tangkap minta maaf!"*
+```python
+try:
+    objek.bersuara()
+except AttributeError:
+    print("Objek ini tidak punya kemampuan bersuara!")
+```
 
 ---
 
-## 4. Method Overriding vs Method Overloading
+## 5. Python Modern: `typing.Protocol` (Duck Typing yang Didukung IDE) 🚀
 
-Banyak pemula yang bingung membedakan kedua istilah ini:
+Di Python 3.8+, jika Anda ingin menggunakan Duck Typing tetapi tetap ingin editor kode (VS Code / PyCharm) memberi bantuan *autocomplete* dan deteksi typo, gunakan **`typing.Protocol`**:
+
+```python
+from typing import Protocol
+
+# Membuat kontrak bentuk (Interface Bebek)
+class BisaBersuara(Protocol):
+    def bersuara(self) -> None:
+        ...
+
+# Fungsi ini menerima objek apa pun ASALKAN memiliki fungsi bersuara()
+def bunyikan(hewan: BisaBersuara):
+    hewan.bersuara()
+```
+Kelas Anda **tidak perlu mewarisi `BisaBersuara`**, tetapi IDE akan langsung mengenali strukturnya. Inilah yang disebut *Structural Subtyping*.
+
+---
+
+## 6. Method Overriding vs Method Overloading
 
 | Pembeda | Method Overriding | Method Overloading |
 | :--- | :--- | :--- |
-| **Definisi** | Menulis ulang method induk di kelas anak dengan nama yang sama. | Menulis beberapa fungsi dengan nama sama tetapi jumlah parameter berbeda di dalam satu class. |
-| **Dukungan Python** | **Didukung Penuh 100%** | **TIDAK didukung secara native** (Fungsi yang ditulis kedua akan menimpa fungsi pertama). |
-| **Solusi di Python** | Cukup tulis method dengan nama sama di anak. | Gunakan **Default Arguments** (`arg=None`) atau `*args`. |
-
-### Contoh Mengakali Overloading di Python:
-Alih-alih membuat dua fungsi terpisah, di Python kita cukup gunakan nilai bawaan:
+| **Definisi** | Menulis ulang method induk di kelas anak dengan nama yang sama. | Menulis beberapa fungsi bernama sama tapi parameter berbeda di 1 class. |
+| **Dukungan Python** | **Didukung Penuh 100%** | **TIDAK didukung secara native** (Fungsi kedua menimpa fungsi pertama). |
+| **Solusi di Python** | Cukup tulis method dengan nama sama di anak. | Gunakan **Default Arguments** (`b=0`) atau `*args`. |
 
 ```python
 class Kalkulator:
-    # Mengakali Overloading: Bisa menjumlahkan 2 angka atau 3 angka sekaligus!
+    # Mengakali Overloading di Python dengan Default Argument:
     def tambah(self, a: int, b: int, c: int = 0) -> int:
         return a + b + c
-
-k = Kalkulator()
-print(k.tambah(5, 10))     # Output: 15 (2 angka)
-print(k.tambah(5, 10, 20)) # Output: 35 (3 angka)
 ```
 
 ---
 
-## 5. Studi Kasus Industri: Gateway Pembayaran (Payment Gateway) 💳
+## 7. Studi Kasus Industri: Gateway Pembayaran (Payment Gateway) 💳
 
-Bayangkan Anda sedang membuat aplikasi toko online seperti Tokopedia / Shopee.  
-Sistem kasir Anda harus bisa menerima pembayaran lewat berbagai macam kanal:
-1. **Tunai**
-2. **QRIS (GoPay / OVO)**
-3. **Kartu Kredit**
-
-### Desain Polimorfik yang Elegan:
 ```python
 class BayarTunai:
     def bayar(self, tagihan: int):
-        print(f"[TUNAI] Pelanggan menyerahkan uang cash pas Rp {tagihan:,}.")
+        print(f"[TUNAI] Menerima uang cash Rp {tagihan:,}.")
 
 class BayarQRIS:
-    def __init__(self, nama_dompet: str):
-        self.nama_dompet = nama_dompet
+    def __init__(self, ewallet: str):
+        self.ewallet = ewallet
 
     def bayar(self, tagihan: int):
-        print(f"[QRIS] Scan barcode lewat {self.nama_dompet} berhasil! Terpotong Rp {tagihan:,}.")
+        print(f"[QRIS] Scan barcode lewat {self.ewallet} terbayar Rp {tagihan:,}.")
 
-class BayarKartuKredit:
-    def __init__(self, nomor_kartu: str):
-        self.nomor_kartu = nomor_kartu
-
-    def bayar(self, tagihan: int):
-        print(f"[KARTU KREDIT] Menagihkan Rp {tagihan:,} ke kartu ****{self.nomor_kartu[-4:]}.")
+# FUNGSI KASIR POLIMORFIK:
+def checkout(kanal_pembayaran, total: int):
+    # Cukup satu baris ini saja! Siapa pun kanal pembayarannya, panggil bayar():
+    kanal_pembayaran.bayar(total)
 ```
-
-### Kasir Pintar (Tanpa Banyak `if...elif`!):
-```python
-def proses_di_kasir(metode_pembayaran, total_belanja: int):
-    print("Memulai proses transaksi...")
-    # Cukup satu baris ini saja! Siapa pun metode pembayarannya, panggil bayar():
-    metode_pembayaran.bayar(total_belanja)
-    print("Transaksi selesai. Terima kasih!\n")
-
-# PENGUJIAN:
-proses_di_kasir(BayarTunai(), 50_000)
-proses_di_kasir(BayarQRIS("GoPay"), 75_000)
-proses_di_kasir(BayarKartuKredit("4111222233334444"), 500_000)
-```
-Lihat betapa bersihnya fungsi `proses_di_kasir()`. Jika bulan depan toko Anda menambah metode **"Transfer Virtual Account"**, Anda tidak perlu mengotori fungsi kasir dengan `elif metode == "VA"`. Cukup buat class baru yang memiliki method `bayar()`, dan kasir langsung otomatis mengenalnya!
 
 ---
 
-## 6. Diagram Alur Polymorphism (Mermaid)
+## 8. Diagram Alur Kerja Polymorphism (Mermaid)
 
 ```mermaid
 flowchart TD
-    Kasir["Fungsi Kasir: proses_di_kasir(metode, 50000)"]
-    
-    Perintah["Panggil Perintah Baku: metode.bayar(50000)"]
+    Kasir["Fungsi Kasir: checkout(kanal, 50000)"]
+    Perintah["Panggil Perintah Baku: kanal.bayar(50000)"]
     Kasir --> Perintah
 
     subgraph BeragamBentuk ["Beragam Bentuk Respons (Polymorphism)"]
-        T["Objek BayarTunai"] -->|Eksekusi Khusus| RT["Terima Uang Cash"]
-        Q["Objek BayarQRIS"] -->|Eksekusi Khusus| RQ["Scan Barcode Dompet Digital"]
-        K["Objek BayarKartuKredit"] -->|Eksekusi Khusus| RK["Otorisasi Mesin EDC Bank"]
+        T["Objek BayarTunai"] -->|Respons Unik| RT["Terima Uang Cash di Meja"]
+        Q["Objek BayarQRIS"] -->|Respons Unik| RQ["Scan Barcode Dompet Digital"]
+        K["Objek BayarKartuKredit"] -->|Respons Unik| RK["Otorisasi Mesin EDC Bank"]
     end
 
     Perintah -.-> T
@@ -214,61 +205,42 @@ flowchart TD
 
 ---
 
-## 7. ⚠️ Awas Jebakan Klasik Pemula!
-
-### ❌ Jebakan: Memaksa `if isinstance()` di Semua Tempat
-Banyak programmer pemula yang menulis fungsi kasir seperti ini:
-```python
-# ❌ KODE BURUK (ANTI-POLYMORPHISM):
-def kasir_buruk(metode, jumlah):
-    if isinstance(metode, BayarTunai):
-        metode.bayar_tunai(jumlah)
-    elif isinstance(metode, BayarQRIS):
-        metode.bayar_qris(jumlah)
-    elif isinstance(metode, BayarKartuKredit):
-        metode.bayar_kartu(jumlah)
-```
-**Mengapa ini buruk?**  
-Karena setiap kali ada metode pembayaran baru, Anda **terpaksa membuka kembali dan mengubah fungsi kasir**! Ini melanggar prinsip *Open/Closed Principle* (yang akan kita pelajari di Modul 12).  
-*Solusi*: Samakan nama method-nya menjadi `bayar(jumlah)`, lalu panggil langsung secara polimorfik!
-
----
-
-## 8. 🎯 Kuis Kilat Cek Pemahaman Mandiri
+## 9. 🎯 Kuis Kilat Cek Pemahaman Mandiri
 
 #### Soal 1:
-> Apa makna filosofis dari semboyan Python *"Duck Typing"*?  
-> A. Semua class di Python harus mewarisi class Bebek.  
-> B. Python tidak peduli tipe atau silsilah suatu objek, asalkan objek tersebut memiliki method/kemampuan yang dipanggil.  
-> C. Hewan bebek adalah hewan resmi maskot bahasa Python.  
+> Mengapa kode berikut disebut polimorfik?
+> ```python
+> a = 10 + 20
+> b = "Halo " + "Dunia"
+> ```
 
 <details>
 <summary>👉 Klik untuk melihat Jawaban Soal 1</summary>
 
-**Jawaban: B**  
-*Penjelasan*: Duck Typing berarti jika sebuah objek bisa melakukan aksi yang diminta (misal: bersuara seperti bebek), Python menganggap objek itu valid tanpa memeriksa apakah ia keturunan Bebek atau bukan.
+**Jawaban: Karena operator `+` memiliki banyak bentuk aksi yang cerdas.**  
+*Penjelasan*: Pada angka, `+` melakukan penjumlahan matematika numerik. Pada teks, `+` melakukan penggabungan string (concatenation). Satu simbol perintah yang sama merespons berbeda tergantung tipe objeknya.
 </details>
 
 ---
 
 #### Soal 2:
-> Mengapa kita tidak bisa membuat dua fungsi `def hitung(a)` dan `def hitung(a, b)` di dalam satu class Python seperti di bahasa Java?  
-> A. Karena Python melarang nama fungsi sama, fungsi kedua akan menimpa fungsi pertama di dalam memori.  
-> B. Karena parameter `b` bersifat terlarang di Python.  
-> C. Karena memori komputer akan meledak.  
+> Dalam filosofi Duck Typing di Python, apa perbedaan antara mazhab LBYL dan EAFP?  
+> A. LBYL memeriksa kesiapan sebelum menjalankan (`hasattr`), sedangkan EAFP langsung mengeksekusi di dalam blok `try...except`.  
+> B. LBYL untuk angka, EAFP untuk huruf.  
+> C. LBYL sudah dihapus dari Python.  
 
 <details>
 <summary>👉 Klik untuk melihat Jawaban Soal 2</summary>
 
 **Jawaban: A**  
-*Penjelasan*: Di Python, definisi fungsi kedua dengan nama yang sama akan menimpa (*overwrite*) fungsi pertama. Solusinya di Python adalah menggunakan nilai bawaan (default argument) seperti `def hitung(a, b=0)`.
+*Penjelasan*: LBYL (*Look Before You Leap*) memeriksa dulu keberadaan method sebelum dipanggil. EAFP (*Easier to Ask for Forgiveness than Permission*) langsung memanggil method dan menangkap `AttributeError` jika ternyata method tersebut tidak ada. Komunitas Python sangat menyukai gaya EAFP.
 </details>
 
 ---
 
-## 9. 🛠️ Berkas Latihan di Modul Ini
+## 10. 🛠️ Berkas Latihan di Modul Ini
 Silakan buka dan jalankan file berikut di terminal:
-1. `01_dasar_polymorphism.py` $\rightarrow$ Praktik loop polimorfik suara hewan dan armada transportasi.
-2. `02_duck_typing.py` $\rightarrow$ Demonstrasi nyata filosofi Duck Typing tanpa ikatan inheritance.
+1. `01_dasar_polymorphism.py` $\rightarrow$ Praktik loop polimorfik armada transportasi.
+2. `02_duck_typing.py` $\rightarrow$ Demonstrasi nyata filosofi Duck Typing, perbandingan LBYL vs EAFP, dan Media Player.
 3. `03_latihan_mandiri.py` $\rightarrow$ Tantangan membuat Payment Gateway Toko Online (Tunai, QRIS, Kartu Kredit).
 4. `03_solusi_latihan.py` $\rightarrow$ Kunci jawaban lengkap latihan.
