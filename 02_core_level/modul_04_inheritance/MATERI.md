@@ -1,6 +1,6 @@
 # 🧬 MODUL 4: PILAR 2 – INHERITANCE (PEWARISAN SIFAT & DRY)
 > **Tingkat**: Core Level (4 Pilar Utama OOP)  
-> **Tujuan**: Memahami konsep **Inheritance** (pewarisan sifat), hubungan *IS-A*, fungsi sakti `super().__init__()`, pengecekan silsilah dengan `isinstance()` & `issubclass()`, Multiple Inheritance, serta MRO (*Method Resolution Order*).
+> **Tujuan**: Memahami konsep **Inheritance** (pewarisan sifat), hubungan *IS-A*, fungsi sakti `super()`, memperkaya method orang tua, pengecekan silsilah dengan `isinstance()` & `issubclass()`, Multiple Inheritance, MRO (*Method Resolution Order*), dan pola industri *Mixin Pattern*.
 
 ---
 
@@ -53,43 +53,55 @@ class Kendaraan:
         self.kecepatan = 0
 
     def klakson(self):
-        print(f"[{self.merk}] Tiiin tiiiin!")
+        print(f"[{self.merk}] Tiiin tiiin!")
 
 # 2. KELAS ANAK (CHILD)
 # Perhatikan tanda kurung: Mobil mewarisi Kendaraan!
 class Mobil(Kendaraan):
-    pass  # Belum menulis apa-apa, tapi sudah otomatis punya merk, warna, dan klakson!
+    pass  # Otomatis mewarisi merk, warna, dan kemampuan klakson!
 ```
 
 ```python
 avanza = Mobil("Toyota Avanza", "Hitam")
-print(avanza.merk)   # Output: Toyota Avanza (Dapat warisan!)
-avanza.klakson()     # Output: [Toyota Avanza] Tiiin tiiiin! (Dapat warisan!)
+print(avanza.merk)   # Output: Toyota Avanza
+avanza.klakson()     # Output: [Toyota Avanza] Tiiin tiiin!
 ```
 
 ---
 
-## 3. Fungsi Sakti `super()`: Memanggil Kemampuan Orang Tua
+## 3. Fungsi Sakti `super()`: Bukan Hanya untuk `__init__`!
 
-Bagaimana jika kelas anak ingin punya atribut tambahan (misal: mobil punya `jumlah_pintu`), tetapi **tidak mau menulis ulang** `self.merk` dan `self.warna`?
+Fungsi `super()` merujuk langsung ke kelas induk (*superclass*). Kita bisa menggunakannya dalam dua situasi:
 
-Gunakan fungsi sakti: **`super().__init__()`**!
-
+### A. Di dalam `__init__` (Mengurus Data Umum)
 ```python
 class Mobil(Kendaraan):
     def __init__(self, merk: str, warna: str, jumlah_pintu: int):
-        # 1. Panggil constructor orang tua untuk mengurus merk & warna:
+        # 1. Panggil constructor orang tua:
         super().__init__(merk, warna)
-        
-        # 2. Urus atribut baru milik pribadi kelas anak:
+        # 2. Tambah atribut khusus milik anak:
         self.jumlah_pintu = jumlah_pintu
-
-    def buka_bagasi(self):
-        print(f"Bagasi {self.merk} yang berpintu {self.jumlah_pintu} dibuka.")
 ```
 
-> **Mengapa harus `super()`?**  
-> `super()` merujuk langsung ke kelas induk (*superclass*). Dengan memanggil `super().__init__()`, kita menyerahkan tugas inisialisasi data umum kepada orang tua, sehingga kode anak tetap ringkas dan bersih.
+### B. Di dalam Method Biasa (Memperkaya Aksi Orang Tua)
+Sering kali anak **tidak ingin membuang total** kemampuan orang tua, melainkan **menjalankan aksi orang tua DULU, baru menambah aksi baru**:
+
+```python
+class Ambulans(Kendaraan):
+    def klakson(self):
+        # 1. Bunyikan klakson bawaan orang tua:
+        super().klakson()
+        # 2. Tambahkan aksi khusus ambulans:
+        print(f"[{self.merk}] Wiu wiu wiu! Sirine darurat dinyalakan!")
+```
+
+```python
+amb = Ambulans("Toyota HiAce", "Putih")
+amb.klakson()
+# Output:
+# [Toyota HiAce] Tiiin tiiin!
+# [Toyota HiAce] Wiu wiu wiu! Sirine darurat dinyalakan!
+```
 
 ---
 
@@ -103,7 +115,7 @@ Python menyediakan dua fungsi bawaan untuk memeriksa silsilah keturunan:
 ```python
 avanza = Mobil("Toyota", "Silver", 4)
 
-print(isinstance(avanza, Mobil))      # True (Jelas, avanza adalah Mobil)
+print(isinstance(avanza, Mobil))      # True (avanza adalah Mobil)
 print(isinstance(avanza, Kendaraan))  # True! (Karena Mobil adalah Kendaraan)
 print(isinstance(avanza, str))        # False (Bukan teks)
 
@@ -112,27 +124,29 @@ print(issubclass(Mobil, Kendaraan))   # True (Mobil anak dari Kendaraan)
 
 ---
 
-## 5. Fitur Khas Python: Multiple Inheritance (Punya Dua Induk) 👨‍👩‍👧
+## 5. Fitur Khas Python: Multiple Inheritance & Pola "Mixin" 🔌
 
-Tidak seperti Java atau C# yang hanya mengizinkan satu induk kandung, Python mengizinkan sebuah class mewarisi sifat dari **banyak induk sekaligus**:
+Python mengizinkan sebuah class mewarisi sifat dari **banyak induk sekaligus**. Di industri, pola ini paling sering diterapkan sebagai **Mixin Pattern** (kelas pelengkap kemampuan / plugin mandiri):
 
 ```python
-class KemampuanTerbang:
-    def terbang(self):
-        print("Mengepakkan sayap dan terbang di angkasa!")
+# MIXIN 1: Kemampuan mencetak log
+class LoggerMixin:
+    def catat_log(self, pesan: str):
+        print(f"[LOG {self.__class__.__name__}]: {pesan}")
 
-class KemampuanBerenang:
-    def berenang(self):
-        print("Mendayung kaki dan berenang di danau!")
+# MIXIN 2: Kemampuan konversi ke format teks
+class TeksFormatterMixin:
+    def ke_huruf_besar(self, teks: str) -> str:
+        return teks.upper()
 
-# Bebek mewarisi dua kemampuan sekaligus!
-class Bebek(KemampuanTerbang, KemampuanBerenang):
-    def __init__(self, nama: str):
-        self.nama = nama
+# KELAS NYATA: Mewarisi class utama + Mixin tambahan
+class Transaksi(LoggerMixin, TeksFormatterMixin):
+    def __init__(self, id_transaksi: str, total: int):
+        self.id_transaksi = id_transaksi
+        self.total = total
 
-donald = Bebek("Donald")
-donald.terbang()   # Output: Mengepakkan sayap dan terbang di angkasa!
-donald.berenang()  # Output: Mendayung kaki dan berenang di danau!
+    def bayar(self):
+        self.catat_log(f"Transaksi {self.id_transaksi} sebesar Rp {self.total:,} berhasil dibayar.")
 ```
 
 ---
@@ -154,11 +168,11 @@ Python menyelesaikannya dengan sangat tertib menggunakan algoritma **C3 Lineariz
 
 Anda bisa melihat urutan pencarian prioritas Python dengan perintah:
 ```python
-print(Bebek.mro())
-# Output: [Bebek, KemampuanTerbang, KemampuanBerenang, object]
+print(AnakD.mro())
+# Output: [AnakD, AyahB, IbuC, KakekA, object]
 ```
 Python akan mencari dari kiri ke kanan:  
-Cari di diri sendiri (`Bebek`) $\rightarrow$ cari di orang tua pertama (`KemampuanTerbang`) $\rightarrow$ cari di orang tua kedua (`KemampuanBerenang`) $\rightarrow$ terakhir cari di `object` bawaan Python.
+Cari di diri sendiri (`AnakD`) $\rightarrow$ cari di orang tua pertama (`AyahB`) $\rightarrow$ cari di orang tua kedua (`IbuC`) $\rightarrow$ terakhir cari di `object` bawaan Python.
 
 ---
 
@@ -203,23 +217,23 @@ Jika ada perubahan di tingkat kakek buyut, semua anak-cucunya bisa rusak!
 ---
 
 #### Soal 2:
-> Apa kegunaan dari pemanggilan `super().__init__(...)` pada class anak?  
-> A. Menghapus data class induk agar hemat memori.  
-> B. Menjalankan fungsi constructor class induk agar atribut induk terpasang pada anak.  
-> C. Mengubah nama class anak menjadi nama class induk.  
+> Jika kita ingin menjalankan fungsi `simpan()` milik orang tua, lalu menambahkan aksi kirim email di anak, bagaimana cara menulisnya?  
+> A. `super().simpan()` lalu baris berikutnya kode kirim email.  
+> B. `parent.simpan()` lalu baris berikutnya kode kirim email.  
+> C. `self.simpan()` lalu baris berikutnya kode kirim email.  
 
 <details>
 <summary>👉 Klik untuk melihat Jawaban Soal 2</summary>
 
-**Jawaban: B**  
-*Penjelasan*: `super().__init__()` mendelegasikan inisialisasi data umum kepada class orang tua sehingga anak tidak perlu mengetik ulang inisialisasi tersebut.
+**Jawaban: A (`super().simpan()`)**  
+*Penjelasan*: `super()` memanggil method versi class orang tua secara eksplisit, lalu anak dapat menambahkan logika tambahannya sendiri di bawahnya.
 </details>
 
 ---
 
 ## 9. 🛠️ Berkas Latihan di Modul Ini
 Silakan buka dan jalankan file berikut di terminal:
-1. `01_dasar_inheritance.py` $\rightarrow$ Praktik pewarisan `Kendaraan` ke `Mobil` dan cek `isinstance()`.
-2. `02_multiple_inheritance_mro.py` $\rightarrow$ Praktik Multiple Inheritance, Bebek terbang & berenang, serta cek urutan `mro()`.
+1. `01_dasar_inheritance.py` $\rightarrow$ Praktik pewarisan `Kendaraan` ke `Mobil`, aksi `super().klakson()`, dan cek `isinstance()`.
+2. `02_multiple_inheritance_mro.py` $\rightarrow$ Praktik Multiple Inheritance, Pola Mixin (`LoggerMixin`), dan cek urutan `mro()`.
 3. `03_latihan_mandiri.py` $\rightarrow$ Tantangan membangun Sistem Hirarki Karyawan Kantor.
 4. `03_solusi_latihan.py` $\rightarrow$ Kunci jawaban lengkap latihan.

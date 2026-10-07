@@ -5,8 +5,9 @@ Modul 4: Pilar 2 – Inheritance (Pewarisan Sifat & DRY)
 
 File ini mendemonstrasikan:
 1. Hubungan Parent Class dan Child Class (IS-A)
-2. Pemanfaatan super().__init__() untuk kode DRY (Don't Repeat Yourself)
-3. Pengecekan garis keturunan dengan isinstance() dan issubclass()
+2. Pemanfaatan super().__init__() untuk inisialisasi DRY
+3. Memperkaya method orang tua dengan super().method() (kasus Mobil Ambulans)
+4. Pengecekan garis keturunan dengan isinstance() dan issubclass()
 """
 import sys
 
@@ -42,14 +43,12 @@ class Kendaraan:
 
 
 # ==============================================================
-# 2. CHILD CLASS 1: MOBIL (MEWARISI KENDARAAN)
+# 2. CHILD CLASS 1: MOBIL BIASA
 # ==============================================================
 class Mobil(Kendaraan):
     def __init__(self, merk: str, warna: str, kapasitas_bensin: int, jumlah_pintu: int):
-        # Panggil tugas orang tua untuk mengisi merk, warna, dan bensin:
+        # Panggil tugas orang tua untuk mengisi data umum:
         super().__init__(merk, warna, kapasitas_bensin)
-        
-        # Fitur khusus mobil:
         self.jumlah_pintu = jumlah_pintu
         self.ac_menyala = False
 
@@ -59,45 +58,51 @@ class Mobil(Kendaraan):
 
 
 # ==============================================================
-# 3. CHILD CLASS 2: MOTOR (MEWARISI KENDARAAN)
+# 3. CHILD CLASS 2: AMBULANS (MEMPERKAYA METHOD super().klakson())
+# ==============================================================
+class Ambulans(Kendaraan):
+    def klakson(self):
+        # 1. Jalankan dulu bunyi klakson bawaan orang tua:
+        super().klakson()
+        # 2. Tambahkan aksi khusus milik ambulans di bawahnya:
+        print(f"[{self.merk}] Wiuuu wiuuu! Sirine darurat dinyalakan!")
+
+
+# ==============================================================
+# 4. CHILD CLASS 3: SEPEDA MOTOR (OVERRIDE TOTAL)
 # ==============================================================
 class SepedaMotor(Kendaraan):
     def __init__(self, merk: str, warna: str, kapasitas_bensin: int, tipe_kopling: str):
         super().__init__(merk, warna, kapasitas_bensin)
         self.tipe_kopling = tipe_kopling
 
-    # Overriding (Menimpa suara klakson agar lebih cempreng):
+    # Overriding Total (Menimpa suara klakson bawaan dengan suara baru):
     def klakson(self):
         print(f"[{self.merk}] Tiit tiit! (Klakson motor cempreng)")
 
-    def atraksi_wheelie(self):
-        print(f"[{self.merk}] Mengangkat roda depan (Wheelie)! Hati-hati jatuh!")
-
 
 # --- PENGUJIAN ---
-print("\n--- 1. Menguji Objek Mobil ---")
+print("\n--- 1. Menguji Objek Mobil Biasa ---")
 avanza = Mobil("Toyota Avanza", "Putih", 45, 4)
-avanza.nyalakan_mesin()      # Warisan dari Kendaraan
-avanza.klakson()             # Warisan dari Kendaraan
-avanza.nyalakan_ac()         # Fitur khusus Mobil
-avanza.isi_bensin(10)        # Warisan dari Kendaraan
+avanza.nyalakan_mesin()
+avanza.klakson()
+avanza.nyalakan_ac()
 
-print("\n--- 2. Menguji Objek Sepeda Motor ---")
+print("\n--- 2. Menguji Objek Ambulans (super().klakson()) ---")
+amb = Ambulans("Toyota HiAce Ambulans", "Putih", 60)
+amb.nyalakan_mesin()
+amb.klakson()  # Menghasilkan suara klakson induk + sirine!
+
+print("\n--- 3. Menguji Objek Sepeda Motor (Override Total) ---")
 vespa = SepedaMotor("Vespa Matic", "Kuning", 7, "Otomatis")
-vespa.nyalakan_mesin()       # Warisan dari Kendaraan
-vespa.klakson()              # Suara khusus motor (Overridden)
-vespa.atraksi_wheelie()      # Fitur khusus Sepeda Motor
+vespa.klakson()
 
 # --- PENGECEKAN SILSILAH KETURUNAN ---
-print("\n--- 3. Pengecekan Silsilah Keturunan ---")
-print(f"Apakah avanza adalah Mobil?       -> {isinstance(avanza, Mobil)}")
-print(f"Apakah avanza adalah Kendaraan?   -> {isinstance(avanza, Kendaraan)}")
-print(f"Apakah avanza adalah SepedaMotor? -> {isinstance(avanza, SepedaMotor)}")
-
-print(f"\nApakah Mobil anak dari Kendaraan?       -> {issubclass(Mobil, Kendaraan)}")
-print(f"Apakah SepedaMotor anak dari Kendaraan? -> {issubclass(SepedaMotor, Kendaraan)}")
-print(f"Apakah Kendaraan anak dari Mobil?       -> {issubclass(Kendaraan, Mobil)}")
+print("\n--- 4. Pengecekan Silsilah Keturunan ---")
+print(f"Apakah amb adalah Ambulans?  -> {isinstance(amb, Ambulans)}")
+print(f"Apakah amb adalah Kendaraan? -> {isinstance(amb, Kendaraan)}")
+print(f"Apakah Ambulans anak dari Kendaraan? -> {issubclass(Ambulans, Kendaraan)}")
 
 print("\n" + "=" * 60)
-print("[OK] Selesai: Konsep pewarisan berjalan efisien tanpa duplikasi kode.")
+print("[OK] Selesai: Konsep pewarisan dan super() bekerja sempurna.")
 print("=" * 60)

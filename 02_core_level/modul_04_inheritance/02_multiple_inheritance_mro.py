@@ -4,9 +4,9 @@
 Modul 4: Pilar 2 – Inheritance (Pewarisan Sifat & DRY)
 
 File ini mendemonstrasikan:
-1. Multiple Inheritance di Python (mewarisi banyak induk sekaligus)
-2. Masalah Berlian (Diamond Problem)
-3. Cara Python menyelesaikan urutan pencarian dengan MRO (Method Resolution Order)
+1. Multiple Inheritance di Python
+2. Penerapan Pola Nyata Industri: Mixin Pattern (LoggerMixin)
+3. Masalah Berlian (Diamond Problem) & MRO (Method Resolution Order)
 """
 import sys
 
@@ -17,32 +17,37 @@ if sys.stdout.encoding.lower() != 'utf-8':
         pass
 
 print("=" * 60)
-print("[DEMO] MULTIPLE INHERITANCE & MRO (METHOD RESOLUTION ORDER)")
+print("[DEMO] MULTIPLE INHERITANCE, MIXIN, & MRO")
 print("=" * 60)
 
 # ==============================================================
-# 1. CONTOH DASAR: BEBEK DENGAN DUA KEMAMPUAN INDUK
+# 1. POLA INDUSTRI: MIXIN PATTERN (PLUGIN KEMAMPUAN MANDIRI)
 # ==============================================================
-class KemampuanTerbang:
-    def aksi_terbang(self):
-        print("[TERBANG] Mengepakkan sayap dan terbang di langit!")
+class LoggerMixin:
+    """Mixin untuk memberikan kemampuan mencetak log aktivitas."""
+    def catat_log(self, pesan: str):
+        print(f"[LOG {self.__class__.__name__}]: {pesan}")
 
-class KemampuanBerenang:
-    def aksi_berenang(self):
-        print("[BERENANG] Mendayung kaki dan meluncur di atas air!")
+class NotifikasiSmsMixin:
+    """Mixin untuk memberikan kemampuan mengirim SMS notifikasi."""
+    def kirim_sms(self, nomor: str, pesan: str):
+        print(f"[SMS ke {nomor}]: {pesan}")
 
-class Bebek(KemampuanTerbang, KemampuanBerenang):
-    def __init__(self, nama: str):
-        self.nama = nama
+# Kelas Bisnis Nyata yang memanfaatkan dua Mixin di atas:
+class AkunUser(LoggerMixin, NotifikasiSmsMixin):
+    def __init__(self, username: str, no_hp: str):
+        self.username = username
+        self.no_hp = no_hp
 
-    def bersuara(self):
-        print(f"[{self.nama}] Kweeeek kweeeek!")
+    def ganti_password(self, password_baru: str):
+        # Memanfaatkan fitur dari LoggerMixin:
+        self.catat_log(f"User '{self.username}' berhasil mengganti password.")
+        # Memanfaatkan fitur dari NotifikasiSmsMixin:
+        self.kirim_sms(self.no_hp, "Keamanan: Password akun Anda baru saja diperbarui.")
 
-donald = Bebek("Donald")
-print("\n--- 1. Bebek Mewarisi 2 Kemampuan Induk Sekaligus ---")
-donald.bersuara()
-donald.aksi_terbang()
-donald.aksi_berenang()
+print("\n--- 1. Menguji Penerapan Mixin Pattern ---")
+user = AkunUser("anton_dev", "08123456789")
+user.ganti_password("RahasiaBaru#2026")
 
 # ==============================================================
 # 2. BEDAH KASUS: DIAMOND PROBLEM & MRO
@@ -69,7 +74,7 @@ class AnakD(AyahB, IbuC):
 
 anak = AnakD()
 print("Siapa yang disapa saat 'anak.sapa()' dipanggil?")
-anak.sapa()  # Akan memanggil AyahB karena ditulis lebih dulu di tanda kurung!
+anak.sapa()  # Memanggil AyahB karena ditulis lebih dulu di parameter class
 
 # --- MELIHAT URUTAN MRO SECARA NYATA ---
 print("\n--- Melihat Jalur Pencarian MRO Python (Class.mro()) ---")
@@ -79,8 +84,7 @@ for urutan, cls in enumerate(AnakD.mro(), start=1):
 print("\n>>> KESIMPULAN MRO:")
 print("Python mencari dari kiri ke kanan:")
 print("1. Cek di AnakD -> 2. Cek di AyahB -> 3. Cek di IbuC -> 4. Cek di KakekA -> 5. object")
-print("Semua teratur dan bebas dari konflik percabangan!")
 
 print("\n" + "=" * 60)
-print("[OK] Selesai: Multiple Inheritance & MRO dipahami dengan jelas.")
+print("[OK] Selesai: Mixin Pattern & MRO terkuasai dengan mantap.")
 print("=" * 60)
