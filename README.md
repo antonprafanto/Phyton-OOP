@@ -35,7 +35,7 @@ Untuk melihat silabus super lengkap dan memantau status belajar secara detail, s
 | *(Intermediate)*| [**Modul 8**](03_intermediate_level/modul_08_special_methods/MATERI.md) | Metode Spesial | `@classmethod` (Alternative Constructor) vs `@staticmethod` |
 | | [**Modul 9**](03_intermediate_level/modul_09_custom_exceptions/MATERI.md) | Custom Exception | Membuat Error Sendiri yang Mewarisi `Exception` |
 | | [**Modul 10**](03_intermediate_level/modul_10_dataclasses/MATERI.md) | Modern Python Shortcut | Modul `@dataclass` & Penulisan Type Hinting Modern |
-| **Fase 4** | **Modul 11** | Hubungan Antar Objek | Association, Aggregation, & Komposisi (*Composition over Inheritance*) |
+| **Fase 4** | [**Modul 11**](04_hero_level/modul_11_object_relationships/MATERI.md) | Hubungan Antar Objek | Association, Aggregation, & Komposisi (*Composition over Inheritance*) |
 | *(Hero)* | **Modul 12** | Prinsip S.O.L.I.D | Clean Architecture (S-O-L-I-D) Dijelaskan Ramah Awam |
 | | **Modul 13** | Design Patterns Populer | Singleton, Factory Method, dan Strategy Pattern di Python |
 | **Fase 5** | **Modul 14** | Proyek Akhir (Capstone) | Aplikasi Nyata Utuh: SmartPOS System / Text-RPG Adventure |

@@ -22,7 +22,7 @@ Gunakan daftar centang di bawah ini untuk memantau perjalanan belajar kita agar 
 | [x] | **Modul 8** | Metode Spesial: `@classmethod` vs `@staticmethod` | Intermediate |
 | [x] | **Modul 9** | Custom Exception: Membuat Pesan Error Sendiri dengan OOP | Intermediate |
 | [x] | **Modul 10** | Modern Python Shortcut: `@dataclass` | Intermediate |
-| [ ] | **Modul 11** | Hubungan Antar Objek: Association, Aggregation, & Composition | Hero |
+| [x] | **Modul 11** | Hubungan Antar Objek: Association, Aggregation, & Composition | Hero |
 | [ ] | **Modul 12** | Prinsip S.O.L.I.D untuk Pemula (Menulis Kode Rapi & Tahan Uji) | Hero |
 | [ ] | **Modul 13** | Design Patterns Populer (Singleton, Factory, Strategy) | Hero |
 | [ ] | **Modul 14** | Proyek Akhir (Capstone Project: SmartPOS / Text-RPG) | Hero |
