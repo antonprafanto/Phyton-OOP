@@ -37,7 +37,7 @@ Untuk melihat silabus super lengkap dan memantau status belajar secara detail, s
 | | [**Modul 10**](03_intermediate_level/modul_10_dataclasses/MATERI.md) | Modern Python Shortcut | Modul `@dataclass` & Penulisan Type Hinting Modern |
 | **Fase 4** | [**Modul 11**](04_hero_level/modul_11_object_relationships/MATERI.md) | Hubungan Antar Objek | Association, Aggregation, & Komposisi (*Composition over Inheritance*) |
 | *(Hero)* | [**Modul 12**](04_hero_level/modul_12_solid_principles/MATERI.md) | Prinsip S.O.L.I.D | Clean Architecture (S-O-L-I-D) Dijelaskan Ramah Awam |
-| | **Modul 13** | Design Patterns Populer | Singleton, Factory Method, dan Strategy Pattern di Python |
+| | [**Modul 13**](04_hero_level/modul_13_design_patterns/MATERI.md) | Design Patterns Populer | Singleton, Factory Method, dan Strategy Pattern di Python |
 | **Fase 5** | **Modul 14** | Proyek Akhir (Capstone) | Aplikasi Nyata Utuh: SmartPOS System / Text-RPG Adventure |
 
 ---
