@@ -196,7 +196,81 @@ print(user_pulih.saldo)  # Output: 750000
 
 ---
 
-## 7. 🎯 Kuis Kilat Cek Pemahaman Mandiri
+---
+
+## 7. ⚠️ Awas Jebakan Pemula! (Common Pitfalls)
+
+Berikut adalah kesalahan-kesalahan yang paling sering ditemui saat belajar Dunder Methods:
+
+### ❌ Jebakan 1: Return Type di `__str__` dan `__repr__` Bukan String!
+Method `__str__` dan `__repr__` **WAJIB** mengembalikan tipe data `str`. Anda tidak boleh mengembalikan angka, dictionary, atau melakukan `print()` di dalamnya!
+```python
+# SALAH:
+def __str__(self):
+    print(self.nama)  # Mengembalikan None!
+    # Akan muncul error: TypeError: __str__ returned non-string (type NoneType)
+
+# SALAH:
+def __str__(self):
+    return self.harga # Jika harga int, akan error: TypeError: __str__ returned non-string (type int)
+
+# BENAR:
+def __str__(self):
+    return f"{self.nama} seharga Rp {self.harga:,}"
+```
+
+### ❌ Jebakan 2: Nilai Kembalian `__len__` Negatif atau Bukan Integer
+Method `__len__` diwajibkan oleh Python untuk mengembalikan bilangan bulat non-negatif (`int >= 0`):
+```python
+# SALAH:
+def __len__(self):
+    return 3.5  # TypeError: 'float' object cannot be interpreted as an integer
+
+# SALAH:
+def __len__(self):
+    return -1   # ValueError: __len__() should return >= 0
+```
+
+### ❌ Jebakan 3: Langsung Melempar Objek ke `json.dump()`
+Python bawaan tidak tahu cara menerjemahkan objek kustom kita ke JSON:
+```python
+# SALAH:
+user = Nasabah("Budi", 50000)
+json.dump(user, file)  # 💥 TypeError: Object of type Nasabah is not JSON serializable!
+
+# BENAR:
+# Ubah dulu objek menjadi dictionary Python murni lewat method to_dict()!
+json.dump(user.to_dict(), file)
+```
+
+### ❌ Jebakan 4: Melempar `TypeError` di dalam `__add__` Bukannya `return NotImplemented`
+Saat membuat operator overloading, jika objek lawan tidak didukung, jangan melempar error manual! Kembalikan nilai `NotImplemented` agar Python diberi kesempatan mencoba metode refleksi seperti `__radd__`.
+```python
+# REKOMENDASI PYTHONIC:
+def __add__(self, other):
+    if isinstance(other, Dompet):
+        return Dompet(self.saldo + other.saldo)
+    return NotImplemented  # Cara elegan dan standar Python
+```
+
+---
+
+## 8. 📋 Tabel Cheat-Sheet: Dunder Methods Populer Lainnya
+
+Selain yang telah kita pelajari di modul ini, Python menyediakan banyak dunder method lain yang sangat berguna:
+
+| Dunder Method | Simbol / Fungsi Pemicu | Kegunaan |
+| :--- | :--- | :--- |
+| `__sub__(self, other)` | Operator Kurang (`-`) | Menentukan perilaku pengurangan antar objek |
+| `__mul__(self, other)` | Operator Kali (`*`) | Menentukan perilaku perkalian antar objek |
+| `__truediv__(self, other)` | Operator Bagi (`/`) | Menentukan perilaku pembagian desimal |
+| `__lt__(self, other)` | Operator Kurang Dari (`<`) | Mengaktifkan pengurutan otomatis dengan `sort()` atau `sorted()` |
+| `__getitem__(self, key)` | Pengindeksan (`objek[key]`) | Membuat objek bisa diakses layaknya list atau dictionary |
+| `__contains__(self, item)` | Operator `in` | Mengecek apakah suatu item ada di dalam objek (`item in objek`) |
+
+---
+
+## 9. 🎯 Kuis Kilat Cek Pemahaman Mandiri
 
 #### Soal 1:
 > Jika sebuah class tidak memiliki fungsi `__str__`, tetapi memiliki fungsi `__repr__`, apa yang terjadi saat kita menjalankan `print(objek)`?  
@@ -228,10 +302,26 @@ print(user_pulih.saldo)  # Output: 750000
 
 ---
 
-## 8. 🛠️ Berkas Latihan di Modul Ini
+#### Soal 3:
+> Mengapa perintah `json.dump(kucing_saya, file)` menghasilkan error `TypeError: Object of type Kucing is not JSON serializable`?  
+> A. Karena format JSON hanya mendukung teks alfabet.  
+> B. Karena pustaka bawaan `json` hanya memahami tipe data primitif Python (seperti dict, list, str, int), sehingga objek kustom harus diubah ke dictionary terlebih dahulu (`to_dict()`).  
+> C. Karena file harddisk tidak memiliki izin simpan.  
+
+<details>
+<summary>👉 Klik untuk melihat Jawaban Soal 3</summary>
+
+**Jawaban: B**  
+*Penjelasan*: Pustaka `json` tidak bisa menebak atribut mana saja di dalam objek Anda yang perlu disimpan. Pola industri standar adalah membuat method `to_dict()` pada objek untuk menyediakan dictionary data murni.
+</details>
+
+---
+
+## 10. 🛠️ Berkas Latihan di Modul Ini
 Silakan buka dan jalankan file berikut di terminal:
-1. `01_str_repr_len.py` $\rightarrow$ Praktik `__str__`, `__repr__`, dan `__len__` pada katalog buku.
-2. `02_operator_overloading.py` $\rightarrow$ Praktik perbandingan `__eq__` dan penjumlahan `__add__` pada saldo dompet.
-3. `03_object_serialization_json.py` $\rightarrow$ Praktik menyimpan objek ke file JSON dan memulihkannya kembali.
-4. `04_latihan_mandiri.py` $\rightarrow$ Tantangan membuat Objek `PlaylistLagu` lengkap dengan dunder & serialisasi JSON.
-5. `04_solusi_latihan.py` $\rightarrow$ Kunci jawaban lengkap latihan.
+1. [`01_str_repr_len.py`](file:///c:/Users/anton/vibecoding/OOP/03_intermediate_level/modul_07_dunder_methods/01_str_repr_len.py) $\rightarrow$ Praktik `__str__`, `__repr__`, dan `__len__` pada katalog buku.
+2. [`02_operator_overloading.py`](file:///c:/Users/anton/vibecoding/OOP/03_intermediate_level/modul_07_dunder_methods/02_operator_overloading.py) $\rightarrow$ Praktik perbandingan `__eq__` dan penjumlahan `__add__` pada saldo dompet.
+3. [`03_object_serialization_json.py`](file:///c:/Users/anton/vibecoding/OOP/03_intermediate_level/modul_07_dunder_methods/03_object_serialization_json.py) $\rightarrow$ Praktik menyimpan objek ke file JSON dan memulihkannya kembali.
+4. [`04_latihan_mandiri.py`](file:///c:/Users/anton/vibecoding/OOP/03_intermediate_level/modul_07_dunder_methods/04_latihan_mandiri.py) $\rightarrow$ Tantangan membuat Objek `PlaylistLagu` lengkap dengan dunder & serialisasi JSON.
+5. [`04_solusi_latihan.py`](file:///c:/Users/anton/vibecoding/OOP/03_intermediate_level/modul_07_dunder_methods/04_solusi_latihan.py) $\rightarrow$ Kunci jawaban lengkap latihan.
+
